@@ -1,0 +1,25 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Scanner (Debug)",
+            "type": "shell",
+            "command": "g++",
+            "args": [
+                "-std=c++17",
+                "-g",
+                "-Wall",
+                "-Wextra",
+                "-o",
+                "${workspaceFolder}/scanner_debug",
+                "${workspaceFolder}/main.cpp",
+                "${workspaceFolder}/scanner.cpp"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": ["$gcc"]
+        }
+    ]
+}

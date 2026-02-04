@@ -1,0 +1,12 @@
+// Test file for scanner debugging
+var x = 42;
+var message = "hello world";
+
+fun greet(name) {
+    print "Hello, " + name;
+    return true;
+}
+
+if (x > 10) {
+    greet("user");
+}

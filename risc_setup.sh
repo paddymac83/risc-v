@@ -37,6 +37,7 @@ if [[ "$OSTYPE" != "linux-gnu"* ]]; then
     exit 1
 fi
 
+<<<<<<< HEAD
 echo "Step 1: System Updates and Basic Tools"
 echo "========================================"
 sudo apt update
@@ -130,6 +131,101 @@ pip3 install --user \
     notebook
 
 print_status "Python packages installed"
+=======
+# echo "Step 1: System Updates and Basic Tools"
+# echo "========================================"
+# sudo apt update
+# sudo apt upgrade -y
+# print_status "System updated"
+
+# echo ""
+# echo "Step 2: Installing Build Essentials"
+# echo "====================================="
+# sudo apt install -y \
+#     build-essential \
+#     git \
+#     cmake \
+#     ninja-build \
+#     python3 \
+#     python3-pip \
+#     python3-dev \
+#     python3-setuptools \
+#     wget \
+#     curl \
+#     vim \
+#     htop \
+#     tmux \
+#     tree
+
+# print_status "Build tools installed"
+
+# echo ""
+# echo "Step 3: Installing LLVM 18"
+# echo "=========================="
+# # Download LLVM install script
+# wget -O llvm-install.sh https://apt.llvm.org/llvm.sh
+# chmod +x llvm-install.sh
+
+# # Install LLVM 18
+# sudo ./llvm-install.sh 18
+
+# # Install LLVM development packages
+# sudo apt install -y \
+#     llvm-18 \
+#     llvm-18-dev \
+#     llvm-18-tools \
+#     libllvm18 \
+#     clang-18 \
+#     clang-tools-18 \
+#     libclang-18-dev \
+#     lld-18
+
+# # Set up alternatives
+# sudo update-alternatives --install /usr/bin/llvm-config llvm-config /usr/bin/llvm-config-18 100
+# sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-18 100
+# sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-18 100
+
+# print_status "LLVM 18 installed"
+
+# echo ""
+# echo "Step 4: Installing RISC-V Toolchain"
+# echo "===================================="
+# sudo apt install -y \
+#     gcc-riscv64-linux-gnu \
+#     g++-riscv64-linux-gnu \
+#     binutils-riscv64-linux-gnu
+
+# print_status "RISC-V toolchain installed"
+
+# echo ""
+# echo "Step 5: Installing QEMU"
+# echo "======================="
+# sudo apt install -y \
+#     qemu-user \
+#     qemu-system-misc \
+#     qemu-utils \
+#     qemu-system-riscv64
+
+# print_status "QEMU installed"
+
+# echo ""
+# echo "Step 6: Installing Python Packages"
+# echo "==================================="
+# pip3 install --user --upgrade pip
+# pip3 install --user \
+#     numpy \
+#     scipy \
+#     matplotlib \
+#     tornado \
+#     psutil \
+#     decorator \
+#     attrs \
+#     pytest \
+#     jupyter \
+#     notebook
+
+# print_status "Python packages installed"
+>>>>>>> a6bf26c (scanner.cpp added to compiler project)
 
 echo ""
 echo "Step 7: Creating Workspace Structure"
