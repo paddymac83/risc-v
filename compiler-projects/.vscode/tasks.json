@@ -15,6 +15,24 @@
                 "${workspaceFolder}/main.cpp",
                 "${workspaceFolder}/scanner.cpp"
             ],
+            "group": "build",
+            "problemMatcher": ["$gcc"]
+        },
+        {
+            "label": "Build Scanner Tests",
+            "type": "shell",
+            "command": "g++",
+            "args": [
+                "-std=c++17",
+                "-g",
+                "-O0",
+                "-Wall",
+                "-Wextra",
+                "-o",
+                "${workspaceFolder}/scanner_test",
+                "${workspaceFolder}/scanner_test.cpp",
+                "${workspaceFolder}/scanner.cpp"
+            ],
             "group": {
                 "kind": "build",
                 "isDefault": true
