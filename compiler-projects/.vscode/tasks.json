@@ -38,6 +38,88 @@
                 "isDefault": true
             },
             "problemMatcher": ["$gcc"]
+        },
+        {
+            "label": "Build Chunk Tests",
+            "type": "shell",
+            "command": "g++",
+            "args": [
+                "-std=c++17",
+                "-g",
+                "-O0",
+                "-Wall",
+                "-Wextra",
+                "-o",
+                "${workspaceFolder}/chunk_test",
+                "${workspaceFolder}/chunk_test.cpp",
+                "${workspaceFolder}/chunk.cpp",
+                "${workspaceFolder}/value.cpp",
+                "${workspaceFolder}/debug.cpp"
+            ],
+            "group": "build",
+            "problemMatcher": ["$gcc"]
+        },
+        {
+            "label": "Build Chunk Demo",
+            "type": "shell",
+            "command": "g++",
+            "args": [
+                "-std=c++17",
+                "-g",
+                "-O0",
+                "-Wall",
+                "-Wextra",
+                "-o",
+                "${workspaceFolder}/chunk_demo",
+                "${workspaceFolder}/chunk_demo.cpp",
+                "${workspaceFolder}/chunk.cpp",
+                "${workspaceFolder}/value.cpp",
+                "${workspaceFolder}/debug.cpp"
+            ],
+            "group": "build",
+            "problemMatcher": ["$gcc"]
+        },
+        {
+            "label": "Build VM Tests",
+            "type": "shell",
+            "command": "g++",
+            "args": [
+                "-std=c++17",
+                "-g",
+                "-O0",
+                "-Wall",
+                "-Wextra",
+                "-o",
+                "${workspaceFolder}/vm_test",
+                "${workspaceFolder}/vm_test.cpp",
+                "${workspaceFolder}/vm.cpp",
+                "${workspaceFolder}/chunk.cpp",
+                "${workspaceFolder}/value.cpp",
+                "${workspaceFolder}/debug.cpp"
+            ],
+            "group": "build",
+            "problemMatcher": ["$gcc"]
+        },
+        {
+            "label": "Build VM Demo",
+            "type": "shell",
+            "command": "g++",
+            "args": [
+                "-std=c++17",
+                "-g",
+                "-O0",
+                "-Wall",
+                "-Wextra",
+                "-o",
+                "${workspaceFolder}/vm_demo",
+                "${workspaceFolder}/vm_demo.cpp",
+                "${workspaceFolder}/vm.cpp",
+                "${workspaceFolder}/chunk.cpp",
+                "${workspaceFolder}/value.cpp",
+                "${workspaceFolder}/debug.cpp"
+            ],
+            "group": "build",
+            "problemMatcher": ["$gcc"]
         }
     ]
 }

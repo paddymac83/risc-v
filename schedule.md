@@ -1,9 +1,9 @@
 # 6-Month Detailed Learning Schedule
-## AI Compiler Engineer for RISC-V (Part-Time, Full-Time Employment Compatible)
+## AI Compiler Engineer for RISC-V & ARM (Part-Time, Full-Time Employment Compatible)
 
 **Target:** 12-14 hours/week sustained learning
 **Your Background:** 15 years AI/ML production experience
-**End Goal:** Compiler Engineer specializing in AI workload optimization on RISC-V
+**End Goal:** Compiler Engineer specializing in LLM optimization on RISC-V and ARM edge devices
 
 ---
 
@@ -22,33 +22,41 @@
 
 ---
 
-## 🎯 LLM Optimization Focus
+## 🎯 LLM Optimization Focus - Dual Architecture Approach
 
-**This curriculum emphasizes Large Language Model (LLM) optimization on RISC-V edge devices.**
+**This curriculum emphasizes Large Language Model (LLM) optimization on BOTH RISC-V and ARM edge devices.**
 
-While you'll learn fundamental compiler skills applicable to all AI workloads, the examples and projects are specifically designed around transformer architectures and LLM deployment:
+You'll learn fundamental compiler skills while comparing and contrasting two critical architectures:
+- **RISC-V:** Open, extensible, growing in edge AI
+- **ARM:** Dominant, mature ecosystem, established market
 
-**Key LLM Topics Covered:**
-- **Attention Mechanism Optimization** - Multi-head, multi-query, grouped-query attention
-- **KV-Cache Management** - Efficient memory strategies for autoregressive generation
-- **Transformer-Specific Kernels** - LayerNorm, GELU, token embeddings optimized for RISC-V
-- **Memory Bandwidth Optimization** - Critical for LLM inference on edge devices
-- **Quantization for LLMs** - INT8/INT4 strategies preserving quality
-- **Prefill vs Decode Optimization** - Different optimization strategies for each phase
-- **Small LLM Deployment** - 124M to 1.1B parameter models on RISC-V hardware
+This dual-architecture approach makes you significantly more employable while providing deep insights into optimization trade-offs.
+
+**Key Topics Covered:**
+- **Architecture Comparison** - RISC-V vs ARM for LLM workloads
+- **Vector Extensions** - RVV (RISC-V) vs NEON/SVE2 (ARM)
+- **Attention Optimization** - Platform-specific strategies for transformers
+- **Comparative Benchmarking** - Measure performance differences scientifically
+- **Cross-Platform Skills** - Techniques that transfer between architectures
+- **Quantization Strategies** - INT8/INT4 on both platforms
 
 **Target Models:**
-- GPT-2 (124M parameters) - Full optimization pipeline
-- TinyLlama/DistilGPT2 (1.1B parameters) - Edge deployment
-- BERT-Base - Encoder architecture comparison
-- Custom transformer variants
+- GPT-2 (124M parameters) - Optimized for BOTH platforms
+- TinyLlama/DistilGPT2 (1.1B) - Edge deployment comparison
+- BERT-Base - Encoder architecture on both
 
 **Real-World Application:**
-By the end, you'll be able to optimize and deploy small LLMs on RISC-V edge devices, achieving practical token generation rates suitable for on-device applications like:
-- Edge AI assistants
-- Real-time translation
-- Code completion on embedded systems
-- Privacy-preserving LLM inference
+By the end, you'll deliver comparative benchmarks showing:
+- Performance comparison: RISC-V vs ARM for LLMs
+- Optimization strategies that work on both
+- When to choose each architecture
+- Portfolio demonstrating expertise in BOTH ecosystems
+
+**Career Advantage:**
+- ARM skills → Immediate job market (200+ UK positions)
+- RISC-V skills → Future positioning (growing market)
+- Comparative analysis → Consulting differentiation
+- Dual expertise → Unique, valuable skillset
 
 ---
 
@@ -224,7 +232,7 @@ By the end, you'll be able to optimize and deploy small LLMs on RISC-V edge devi
 
 ---
 
-## Month 2: LLVM Deep Dive & RISC-V Basics
+## Month 2: LLVM Deep Dive & Assembly (RISC-V + ARM)
 
 ### Week 5: LLVM Optimization Passes
 
@@ -310,197 +318,279 @@ By the end, you'll be able to optimize and deploy small LLMs on RISC-V edge devi
 
 ---
 
-### Week 7: RISC-V Assembly Programming
+### Week 7: Assembly Programming - RISC-V & ARM Introduction
 
-**Monday Evening (2 hours)**
+**Monday Evening (2 hours) - RISC-V Fundamentals**
 - [ ] Read "The RISC-V Reader" Chapters 1-2
-- [ ] Order physical copy if you don't have it
 - [ ] Understand RISC-V philosophy: Simple, modular, extensible
 - [ ] Study RV64I base instruction set (40 instructions)
 - [ ] Learn register names: x0-x31, ABI names (a0-a7, t0-t6, s0-s11)
+- [ ] Note: RISC-V has 32 general-purpose registers
 
-**Wednesday Evening (2 hours)**
-- [ ] Write first RISC-V assembly programs:
-  - [ ] Add two numbers
-  - [ ] Fibonacci (iterative)
-  - [ ] String length calculation
-- [ ] Use GNU assembler: `riscv64-linux-gnu-as -o prog.o prog.s`
-- [ ] Link: `riscv64-linux-gnu-ld -o prog prog.o`
-- [ ] Run in QEMU
+**Wednesday Evening (2 hours) - ARM Fundamentals**
+- [ ] Read ARM Architecture Reference Manual (ARMv8-A overview)
+- [ ] Or use "ARM Assembly Language" by William Hohl
+- [ ] Understand ARM philosophy: Performance, power efficiency
+- [ ] Study AArch64 instruction set basics
+- [ ] Learn register names: x0-x30, sp, pc
+- [ ] Note key differences: ARM has 31 GPRs + special registers
 
-**Thursday Evening (2 hours)**
-- [ ] Study RISC-V calling convention
-- [ ] Argument passing: a0-a7
-- [ ] Return values: a0-a1
-- [ ] Saved vs temporary registers
-- [ ] Stack frame layout
-- [ ] Write function calls in assembly
+**Thursday Evening (2 hours) - Comparative Programming**
+- [ ] Write same program in BOTH assembly languages:
+  - [ ] Add two numbers (RISC-V)
+  - [ ] Add two numbers (ARM)
+  - [ ] Compare instruction count, clarity
+- [ ] Fibonacci (iterative) in both
+- [ ] Document differences in syntax and approach
 
-**Saturday Morning (4 hours)**
-- [ ] Implement algorithms in RISC-V assembly:
+**Saturday Morning (5 hours) - Deep Comparative Work**
+- [ ] RISC-V programs (2.5 hours):
   - [ ] Factorial (recursive)
   - [ ] Array sum
-  - [ ] Array maximum
-  - [ ] String copy
-  - [ ] Simple linked list traversal
-- [ ] Practice stack manipulation
-- [ ] Handle function prologues/epilogues
-- [ ] Test all programs
+  - [ ] String length
+  - [ ] Assemble: `riscv64-linux-gnu-as -o prog.o prog.s`
+  - [ ] Run in QEMU: `qemu-riscv64 prog`
 
-**Sunday Afternoon (2 hours)**
-- [ ] Study load/store instructions deeply
-- [ ] Understand: lb, lh, lw, ld, lbu, lhu, lwu
-- [ ] Understand: sb, sh, sw, sd
-- [ ] Memory alignment requirements
-- [ ] Write memory access patterns
+- [ ] ARM programs (2.5 hours):
+  - [ ] Same algorithms in ARM assembly
+  - [ ] Factorial (recursive)
+  - [ ] Array sum
+  - [ ] String length
+  - [ ] Assemble: `aarch64-linux-gnu-as -o prog.o prog.s`
+  - [ ] Run in QEMU: `qemu-aarch64 prog`
+
+**Sunday Afternoon (3 hours) - Analysis & Comparison**
+- [ ] Create comparison table:
+  | Feature | RISC-V | ARM |
+  |---------|---------|-----|
+  | Register count | 32 GPRs | 31 GPRs + SP |
+  | Instruction encoding | Fixed 32-bit | Mostly fixed 32-bit |
+  | Load/Store | Load/Store only | Load/Store only |
+  | Complexity | Minimal | More features |
+- [ ] Study calling conventions (both)
+- [ ] Compare stack frame layouts
 - [ ] Weekly review
 
-**Deliverable:** 10+ RISC-V assembly programs
+**Deliverable:** 6+ programs in BOTH RISC-V and ARM assembly + comparison document
 
 ---
 
-### Week 8: RISC-V & LLVM Integration
+### Week 8: LLVM Backend Comparison - RISC-V & ARM
 
-**Monday Evening (2 hours)**
-- [ ] Study LLVM RISC-V backend location: lib/Target/RISCV/
+**Monday Evening (2 hours) - RISC-V Backend**
+- [ ] Study LLVM RISC-V backend: lib/Target/RISCV/
 - [ ] Read: RISCVInstrInfo.td
 - [ ] Understand TableGen for RISC-V
 - [ ] Map assembly instructions to TableGen definitions
 
-**Wednesday Evening (2 hours)**
-- [ ] Generate RISC-V from LLVM IR:
+**Wednesday Evening (2 hours) - ARM Backend**
+- [ ] Study LLVM ARM backend: lib/Target/AArch64/
+- [ ] Read: AArch64InstrInfo.td
+- [ ] Compare to RISC-V TableGen approach
+- [ ] Note differences in complexity and structure
+
+**Thursday Evening (2 hours) - Code Generation Comparison**
+- [ ] Generate RISC-V from C:
+  ```bash
+  clang --target=riscv64 -S -O2 test.c -o test_rv.s
   ```
-  clang --target=riscv64 -S test.c
+- [ ] Generate ARM from same C:
+  ```bash
+  clang --target=aarch64 -S -O2 test.c -o test_arm.s
   ```
-- [ ] Study generated assembly
-- [ ] Compare to your hand-written code
-- [ ] Identify optimization opportunities
+- [ ] Compare generated assembly
+- [ ] Identify architectural differences
+- [ ] Document optimization choices
 
-**Thursday Evening (2 hours)**
-- [ ] Deep dive: RISCVISelLowering.cpp
-- [ ] Understand instruction selection for RISC-V
-- [ ] Study how calls are lowered
-- [ ] Trace IR → SelectionDAG → MachineInstr
+**Saturday Morning (5 hours) - Backend Deep Dive**
+- [ ] RISC-V backend (2.5 hours):
+  - [ ] Study RISCVISelLowering.cpp
+  - [ ] Trace IR → SelectionDAG → MachineInstr
+  - [ ] Modify simple pattern in RISCVInstrInfo.td
+  - [ ] Example: Custom pattern for constant loading
+  - [ ] Rebuild and test
 
-**Saturday Morning (4 hours)**
-- [ ] Build LLVM with RISC-V backend
-- [ ] Modify simple pattern in RISCVInstrInfo.td
-- [ ] Example: Add custom pattern for constant loading
-- [ ] Rebuild LLVM (this takes time!)
-- [ ] Test your modification
-- [ ] Verify code generation changed
+- [ ] ARM backend (2.5 hours):
+  - [ ] Study AArch64ISelLowering.cpp  
+  - [ ] Trace same IR → Assembly on ARM
+  - [ ] Compare instruction selection strategies
+  - [ ] Note ARM-specific optimizations
 
-**Sunday Afternoon (3 hours)**
-- [ ] Document RISC-V backend architecture
-- [ ] Create diagram: IR → Assembly flow
-- [ ] Write up learnings
-- [ ] Compare RISC-V vs x86 backend design
+**Sunday Afternoon (3 hours) - Comparative Analysis**
+- [ ] Create comparison document:
+  ```markdown
+  # LLVM Backend Comparison: RISC-V vs ARM
+  
+  ## Code Complexity
+  - RISC-V backend: ~X files, Y lines
+  - ARM backend: ~X files, Y lines
+  
+  ## Instruction Selection
+  - RISC-V: Simpler patterns, fewer special cases
+  - ARM: More complex patterns, more optimizations
+  
+  ## Register Allocation
+  - RISC-V: 32 registers, simpler constraints
+  - ARM: 31 registers, more calling convention variants
+  ```
 - [ ] Monthly review: Month 2 complete!
-- [ ] Plan Month 3
+- [ ] Reflect on dual-architecture learning
 
-**Deliverable:** Modified LLVM RISC-V backend + documentation
+**Deliverable:** Comparative analysis of RISC-V vs ARM backends + modified backend code
 
 ---
 
-## Month 3: RISC-V Vectors & TVM Introduction
+## Month 3: Vector Programming (RVV & NEON) + TVM Introduction
 
-### Week 9: RISC-V Vector Extension (RVV) Basics
+### Week 9: Vector Extensions - RVV (RISC-V) & NEON (ARM)
 
-**Monday Evening (2 hours) - Vector Setup**
-- [ ] Download RISC-V Vector Extension Specification v1.0
-- [ ] Read: https://github.com/riscv/riscv-v-spec
-- [ ] Study Chapters 1-2: Overview and programming model
-- [ ] Understand: VLEN, SEW, LMUL concepts
+**Monday Evening (2 hours) - RVV Fundamentals**
+- [ ] Download RISC-V Vector Extension Spec v1.0
+- [ ] Read: https://github.com/riscv/riscv-v-spec Chapters 1-2
+- [ ] Understand: VLEN (vector length), SEW (element width), LMUL (register grouping)
+- [ ] Key concept: Vector-length agnostic programming
 - [ ] Install RVV-capable toolchain
 
-**Wednesday Evening (2 hours)**
-- [ ] Read Spec Chapter 3: Vector register organization
-- [ ] Understand vector register grouping (LMUL)
-- [ ] Study element width (SEW): 8, 16, 32, 64 bits
-- [ ] Learn vtype and vl CSRs
-- [ ] Configure vectors: `vsetvli` instruction
+**Wednesday Evening (2 hours) - ARM NEON Fundamentals**
+- [ ] Read ARM NEON Programmer's Guide
+- [ ] Or "ARM NEON Optimization" guide
+- [ ] Understand: 128-bit fixed-width SIMD vectors
+- [ ] Learn NEON register naming: v0-v31 (128-bit each)
+- [ ] Study NEON intrinsics: `#include <arm_neon.h>`
+- [ ] Compare philosophies: RVV (variable) vs NEON (fixed)
 
-**Thursday Evening (2 hours)**
-- [ ] Study vector arithmetic instructions
-- [ ] Read Spec Chapters 11-12: Integer/FP arithmetic
-- [ ] Understand: vadd, vsub, vmul, vdiv
-- [ ] Study widening/narrowing operations
-- [ ] Write first vector intrinsics code:
+**Thursday Evening (2 hours) - RVV Programming**
+- [ ] Write first RVV programs using intrinsics:
   ```c
   #include <riscv_vector.h>
-  vfloat32m1_t vec_add(vfloat32m1_t a, vfloat32m1_t b, size_t vl) {
-      return vfadd_vv_f32m1(a, b, vl);
+  void vector_add_rvv(float *a, float *b, float *c, size_t n) {
+      size_t vl;
+      for (size_t i = 0; i < n; i += vl) {
+          vl = vsetvl_e32m1(n - i);
+          vfloat32m1_t va = vle32_v_f32m1(&a[i], vl);
+          vfloat32m1_t vb = vle32_v_f32m1(&b[i], vl);
+          vfloat32m1_t vc = vfadd_vv_f32m1(va, vb, vl);
+          vse32_v_f32m1(&c[i], vc, vl);
+      }
   }
   ```
+- [ ] Test on QEMU with RVV support
 
-**Saturday Morning (5 hours)**
-- [ ] Implement vector operations using intrinsics:
-  - [ ] Vector addition (int32, float32)
-  - [ ] Vector multiplication
-  - [ ] Dot product
+**Saturday Morning (5 hours) - Dual Implementation**
+- [ ] RVV Programs (2.5 hours):
+  - [ ] Vector addition (float32, int32)
+  - [ ] Dot product with reduction
   - [ ] SAXPY: y = a*x + y
-  - [ ] Vector reduction (sum all elements)
-- [ ] Test with different vector lengths
-- [ ] Experiment with LMUL=1,2,4,8
-- [ ] Measure performance vs scalar
+  - [ ] Experiment with LMUL=1,2,4
+  - [ ] Benchmark vs scalar code
 
-**Sunday Afternoon (2 hours)**
-- [ ] Study vector memory operations (Chapter 7)
-- [ ] Unit-stride: vle32.v, vse32.v
-- [ ] Strided: vlse32.v, vsse32.v
-- [ ] Indexed: vluxei32.v, vsuxei32.v
-- [ ] Implement matrix-vector multiply (basic)
+- [ ] NEON Programs (2.5 hours):
+  - [ ] Same operations using NEON intrinsics:
+  ```c
+  #include <arm_neon.h>
+  void vector_add_neon(float *a, float *b, float *c, size_t n) {
+      for (size_t i = 0; i < n; i += 4) {  // Fixed: 4 floats per vector
+          float32x4_t va = vld1q_f32(&a[i]);
+          float32x4_t vb = vld1q_f32(&b[i]);
+          float32x4_t vc = vaddq_f32(va, vb);
+          vst1q_f32(&c[i], vc);
+      }
+  }
+  ```
+  - [ ] Dot product using NEON
+  - [ ] SAXPY implementation
+  - [ ] Test on RPi 4 or QEMU-ARM
+
+**Sunday Afternoon (3 hours) - Comparative Analysis**
+- [ ] Create performance/feature comparison:
+  | Feature | RVV | NEON |
+  |---------|-----|------|
+  | Vector width | Variable (VLEN) | Fixed 128-bit |
+  | Adaptability | High (future-proof) | Limited |
+  | Compiler support | Maturing | Excellent |
+  | Code portability | Very high | Medium |
+  
+- [ ] Benchmark same operations:
+  - Vector add performance
+  - Dot product throughput
+  - Note hardware differences affect comparison
+- [ ] Document learnings in blog post draft
 - [ ] Weekly review
 
 **Resources:**
-- RVV Spec: https://github.com/riscv/riscv-v-spec
-- RVV Intrinsics: https://github.com/riscv-non-isa/rvv-intrinsic-doc
-- SiFive Vector Blog: https://www.sifive.com/blog/risc-v-vector-extension
+- RVV: https://github.com/riscv/riscv-v-spec
+- NEON: ARM Developer Guide (https://developer.arm.com/architectures/instruction-sets/intrinsics/)
 
-**Deliverable:** 5+ vectorized operations with benchmarks
+**Deliverable:** Vector programs on BOTH platforms + performance comparison doc
 
 ---
 
-### Week 10: Advanced Vector Programming
+### Week 10: Advanced Vector Programming & Hardware Setup
 
-**Monday Evening (2 hours)**
-- [ ] Study vector masking (Chapter 5)
-- [ ] Understand predication
-- [ ] Implement conditional operations
-- [ ] Write vector compare operations
+**Monday Evening (2 hours) - RVV Advanced Features**
+- [ ] Study vector masking (RVV Chapter 5)
+- [ ] Implement conditional vector operations with masking
+- [ ] Vector compare operations
+- [ ] Masked arithmetic
 
-**Wednesday Evening (2 hours)**
-- [ ] Vector permutations and slides
-- [ ] vslideup, vslidedown
-- [ ] vrgather for arbitrary permutations
-- [ ] Implement vector reverse
-- [ ] Implement vector rotate
+**Wednesday Evening (2 hours) - NEON Advanced Features**
+- [ ] Study NEON comparison and selection
+- [ ] Use `vcmpq_*` family of intrinsics
+- [ ] Implement conditional operations in NEON
+- [ ] Compare to RVV masking approach
 
-**Thursday Evening (2 hours)**
-- [ ] Study fixed-point arithmetic in vectors
-- [ ] Scaling and saturation
-- [ ] Implement quantized operations (INT8)
-- [ ] Simulate INT8 GEMM kernel
+**Thursday Evening (2 hours) - INT8 Quantization Kernels**
+- [ ] RVV: Implement INT8 vector multiply-accumulate
+- [ ] NEON: Implement INT8 GEMM kernel basics  
+- [ ] Study quantization requirements for both
+- [ ] Compare INT8 support: RVV vs NEON
 
-**Saturday Morning (4 hours)**
-- [ ] Implement optimized matrix-matrix multiply
-- [ ] Use vector intrinsics
-- [ ] Tile for cache locality
-- [ ] Unroll loops
-- [ ] Compare: naive vs optimized vs scalar
-- [ ] Target: 60%+ of theoretical peak
-- [ ] Profile and identify bottlenecks
+**Saturday Morning (5 hours) - Optimized Matrix Multiply (Dual Platform)**
+- [ ] RVV Implementation (2.5 hours):
+  - [ ] Tiled matrix multiply with RVV
+  - [ ] Cache-aware tiling strategy
+  - [ ] Loop unrolling where beneficial
+  - [ ] Benchmark: naive vs optimized
+  - [ ] Target 50%+ of theoretical peak
 
-**Sunday Afternoon (2 hours)**
-- [ ] Order VisionFive 2 board (~£70)
-  - Mouser UK or RS Components
-  - 8GB version recommended
-- [ ] While waiting: Continue QEMU work
-- [ ] Document vector optimization techniques
-- [ ] Write blog post outline: "RISC-V Vector Programming"
+- [ ] NEON Implementation (2.5 hours):
+  - [ ] Same algorithm adapted for NEON
+  - [ ] 4x4 or 8x8 kernel tiles
+  - [ ] Fixed-width vectorization
+  - [ ] Benchmark performance
+  - [ ] Compare approaches
+
+**Sunday Afternoon (3 hours) - Hardware Order & Analysis**
+- [ ] **Order both hardware boards:**
+  - [ ] VisionFive 2 (8GB) - RISC-V (£70-80)
+    - Sources: Mouser UK, RS Components
+  - [ ] Raspberry Pi 4/5 (8GB) - ARM (£70-80)
+    - Sources: Official distributors, Pimoroni
+  - **Total investment: ~£140-160**
+  
+- [ ] Create comprehensive comparison document:
+  ```markdown
+  # RVV vs NEON: Comparative Analysis
+  
+  ## Programming Model
+  - RVV: Vector-length agnostic (portable across VLEN)
+  - NEON: Fixed 128-bit (explicit in code)
+  
+  ## Performance (QEMU, preliminary)
+  - Matrix multiply throughput
+  - Vector add latency
+  - INT8 GEMM performance
+  
+  ## Code Complexity
+  - Lines of code comparison
+  - Readability assessment
+  - Portability considerations
+  ```
+
+- [ ] Draft blog post: "Learning Two Vector ISAs: RVV and NEON"
 - [ ] Weekly review
 
-**Deliverable:** Optimized matrix multiply kernel
+**Deliverable:** Optimized matrix kernels on BOTH platforms + hardware ordered + comparison doc
 
 ---
 
@@ -556,52 +646,91 @@ By the end, you'll be able to optimize and deploy small LLMs on RISC-V edge devi
 
 ---
 
-### Week 12: TVM Scheduling & RISC-V Target
+### Week 12: Comparative Benchmarking on Real Hardware
 
-**Monday Evening (2 hours)**
-- [ ] Study TVM schedule primitives
-- [ ] split: divide iteration
-- [ ] reorder: change loop order
-- [ ] bind: map to hardware threads
-- [ ] compute_at: control when/where computation happens
-
-**Wednesday Evening (2 hours)**
-- [ ] Implement scheduled matrix multiply
-- [ ] Tile loops for cache
-- [ ] Reorder for locality
-- [ ] Compare scheduled vs naive
-- [ ] Measure speedup
-
-**Thursday Evening (2 hours)**
-- [ ] Configure TVM for RISC-V cross-compilation
-- [ ] Set target: `target = tvm.target.Target("llvm -mtriple=riscv64-unknown-linux-gnu")`
+**Monday Evening (2 hours) - RISC-V TVM Setup**
+- [ ] Configure TVM for RISC-V target:
+  ```python
+  target = tvm.target.Target("llvm -mtriple=riscv64 -mcpu=sifive-u74 -mattr=+v")
+  ```
 - [ ] Compile simple model for RISC-V
-- [ ] Generate shared library
+- [ ] Test in QEMU first
 
-**Saturday Morning (5 hours)**
-- [ ] Compile ResNet-18 for RISC-V
-- [ ] Use QEMU for testing
-- [ ] Write inference script
-- [ ] Measure performance baseline
-- [ ] Study generated code (assembly)
-- [ ] Identify optimization opportunities
-- [ ] Document full compilation pipeline
+**Wednesday Evening (2 hours) - ARM TVM Setup**
+- [ ] Configure TVM for ARM target:
+  ```python
+  target = tvm.target.Target("llvm -mtriple=aarch64 -mcpu=cortex-a72")
+  ```
+- [ ] Compile same model for ARM
+- [ ] Test in QEMU-ARM
 
-**Sunday Afternoon (3 hours)**
-- [ ] VisionFive 2 setup (if arrived)
-  - [ ] Flash Linux image
-  - [ ] SSH setup
+**Thursday Evening (2 hours) - Benchmark Framework Setup**
+- [ ] Create benchmark script for both platforms:
+  ```python
+  # benchmark.py - runs on both RISC-V and ARM
+  import tvm
+  import time
+  import numpy as np
+  
+  def benchmark_model(model, inputs, num_runs=100):
+      # Warmup
+      for _ in range(10):
+          model.run()
+      
+      # Benchmark
+      times = []
+      for _ in range(num_runs):
+          start = time.perf_counter()
+          model.run()
+          times.append(time.perf_counter() - start)
+      
+      return {
+          'mean_ms': np.mean(times) * 1000,
+          'std_ms': np.std(times) * 1000,
+          'median_ms': np.median(times) * 1000
+      }
+  ```
+- [ ] Test locally
+
+**Saturday Morning (5 hours) - Real Hardware Benchmarking**
+- [ ] **VisionFive 2 Setup** (2.5 hours, if arrived):
+  - [ ] Flash Ubuntu/Debian image
+  - [ ] SSH configuration
   - [ ] Install TVM runtime
-  - [ ] Run inference on hardware!
-- [ ] If not arrived: Continue QEMU work
-- [ ] Monthly review: Month 3 complete!
-- [ ] Major milestone: TVM + RISC-V working!
+  - [ ] Transfer compiled models
+  - [ ] Run benchmarks on RISC-V hardware
+  - [ ] Collect metrics (latency, throughput, memory)
+  
+- [ ] **Raspberry Pi Setup** (2.5 hours):
+  - [ ] Flash Raspberry Pi OS (64-bit)
+  - [ ] SSH configuration
+  - [ ] Install TVM runtime
+  - [ ] Transfer ARM-compiled models
+  - [ ] Run same benchmarks
+  - [ ] Collect comparable metrics
 
-**Deliverable:** TVM compiling models for RISC-V, running inference
+**Sunday Afternoon (3 hours) - Comparative Analysis**
+- [ ] Create performance comparison:
+  | Model | RISC-V (VisionFive 2) | ARM (RPi 4) | Ratio |
+  |-------|----------------------|-------------|-------|
+  | ResNet-18 (inference ms) | ? | ? | ? |
+  | Memory usage (MB) | ? | ? | ? |
+  | Power (watts) | ? | ? | ? |
+  
+- [ ] Document differences:
+  - Architecture impact on performance
+  - Compiler optimization differences
+  - Vector utilization (RVV vs NEON)
+  
+- [ ] Start "RISC-V vs ARM for Edge ML" blog post
+- [ ] Monthly review: Month 3 complete!
+- [ ] Major milestone: Comparative benchmarks on real hardware!
+
+**Deliverable:** Performance comparison document + benchmark suite running on both platforms
 
 ---
 
-## Month 4: TVM Optimization & Custom Operators
+## Month 4: TVM Optimization for Transformers (RISC-V & ARM)
 
 ### Week 13: Writing Custom TVM Operators
 
@@ -1476,36 +1605,43 @@ By the end of Month 6, you should have:
 ### Technical Skills
 - [ ] Built a complete compiler from scratch
 - [ ] Written 10+ LLVM optimization passes
-- [ ] Fluent in RISC-V assembly (write without docs)
-- [ ] Expert in RISC-V vector extension (RVV)
-- [ ] Modified LLVM backend successfully
-- [ ] Compiled and optimized LLM models with TVM
-- [ ] Implemented custom TVM operators for transformers
+- [ ] **Fluent in both RISC-V and ARM assembly**
+- [ ] **Expert in both RVV (RISC-V) and NEON (ARM) vector extensions**
+- [ ] Modified LLVM backends (both RISC-V and AArch64)
+- [ ] Compiled and optimized LLM models with TVM for both platforms
+- [ ] Implemented custom TVM operators for transformers (dual-platform)
 - [ ] Used AutoTVM for auto-optimization
 - [ ] Implemented quantization pipeline for LLMs
 - [ ] Basic MLIR competency with transformer ops
-- [ ] Optimized attention mechanisms for RISC-V vectors
+- [ ] Optimized attention mechanisms for both RVV and NEON
 - [ ] Implemented KV-cache strategies
+- [ ] **Created comparative benchmarks: RISC-V vs ARM**
 
 ### Portfolio
 - [ ] GitHub with 5+ repositories
-- [ ] 3-5 technical blog posts (1500+ words each) focused on LLM optimization
-- [ ] Optimized LLM models with benchmarks (GPT-2, TinyLlama, BERT)
+- [ ] **3-5 technical blog posts including comparative analysis:**
+  - "Learning Two Vector ISAs: RVV vs NEON"
+  - "RISC-V vs ARM for Edge LLMs: Benchmark Comparison"
+  - "Optimizing GPT-2 for Both RISC-V and ARM"
+- [ ] **Optimized LLM models on BOTH platforms with benchmarks**
+- [ ] **Comparative performance analysis (RISC-V vs ARM)**
 - [ ] 1-3 open source contributions (PRs submitted to TVM/LLVM)
 - [ ] Documentation for all projects
-- [ ] Token generation benchmarks on RISC-V hardware
+- [ ] **Token generation benchmarks on both VisionFive 2 and Raspberry Pi**
 
 ### Community
 - [ ] Active on TVM Discord
-- [ ] Participated in RISC-V forums
+- [ ] Participated in both RISC-V and ARM forums
 - [ ] Made connections with 5+ people in field
 - [ ] Shared work publicly
+- [ ] **Built reputation in both RISC-V and ARM ecosystems**
 
 ### Career Readiness
-- [ ] Updated resume with projects
-- [ ] LinkedIn profile showcasing work
-- [ ] Can explain transition story
-- [ ] Understand job market
+- [ ] Updated resume highlighting dual-architecture expertise
+- [ ] LinkedIn profile showcasing comparative work
+- [ ] Can explain transition story and unique positioning
+- [ ] **Understand both RISC-V and ARM job markets**
+- [ ] **Have hedge strategy: ARM for immediate opportunities, RISC-V for future**
 - [ ] Ready for next 6 months of deeper work
 
 ---

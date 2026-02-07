@@ -63,6 +63,90 @@
             ],
             "preLaunchTask": "Build Scanner (Debug)",
             "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "Debug Chunk Tests",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/chunk_test",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "Build Chunk Tests",
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "Debug Chunk Demo (Learning)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/chunk_demo",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "Build Chunk Demo",
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "Debug VM Tests",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/vm_test",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "Build VM Tests",
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "Debug VM Demo (Learning)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/vm_demo",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "Build VM Demo",
+            "miDebuggerPath": "/usr/bin/gdb"
         }
     ]
 }
