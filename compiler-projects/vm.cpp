@@ -1,4 +1,5 @@
 #include "vm.hpp"
+#include "compiler.hpp"
 #include "debug.hpp"
 #include <cstdio>
 
@@ -18,6 +19,13 @@ void VM::push(Value value) {
 Value VM::pop() {
     stackTop_--;
     return *stackTop_;
+}
+
+InterpretResult VM::interpret(std::string_view source) {
+    if (!compile(source)) {
+        return InterpretResult::INTERPRET_COMPILE_ERROR;
+    }
+    return InterpretResult::INTERPRET_OK;
 }
 
 InterpretResult VM::interpret(Chunk* chunk) {

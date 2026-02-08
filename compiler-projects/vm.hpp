@@ -3,6 +3,7 @@
 
 #include "chunk.hpp"
 #include "value.hpp"
+#include <string_view>
 
 constexpr int STACK_MAX = 256;
 
@@ -16,6 +17,10 @@ class VM {
 public:
     VM();
 
+    // Interpret source code (scanning on demand - Chapter 16)
+    InterpretResult interpret(std::string_view source);
+
+    // Interpret a pre-built chunk of bytecode (for direct bytecode tests)
     InterpretResult interpret(Chunk* chunk);
 
     // Stack operations (public for testing)
