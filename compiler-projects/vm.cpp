@@ -22,10 +22,14 @@ Value VM::pop() {
 }
 
 InterpretResult VM::interpret(std::string_view source) {
-    if (!compile(source)) {
+    Chunk chunk;
+    if (!compile(source, chunk)) {
         return InterpretResult::INTERPRET_COMPILE_ERROR;
     }
-    return InterpretResult::INTERPRET_OK;
+
+    chunk_ = &chunk;
+    ip_ = const_cast<uint8_t*>(chunk_->code().data());
+    return run();
 }
 
 InterpretResult VM::interpret(Chunk* chunk) {

@@ -34,6 +34,7 @@ struct Token {
     std::string_view lexeme;
     int line;
 
+    Token() : type(TokenType::END_OF_FILE), lexeme(), line(0) {}
     Token(TokenType type, std::string_view lexeme, int line)
         : type(type), lexeme(lexeme), line(line) {}
 };

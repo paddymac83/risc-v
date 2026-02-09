@@ -2,7 +2,7 @@
 // Supports multiple modes:
 //   ./clox                  - Interactive REPL
 //   ./clox <file>           - Execute a .lox file
-//   ./clox --demo           - Run demo with sample Lox code through the compiler
+//   ./clox --demo           - Run demo: compile & execute a sample expression
 //   ./clox --scan [file]    - Scan-only mode (print tokens without compiling)
 //   ./clox --debug [file]   - Debug mode (verbose output through compiler)
 //   ./clox --test           - Run built-in self-tests
@@ -40,8 +40,8 @@ static void repl() {
     VM vm;
     std::string line;
 
-    printf("clox REPL (Chapter 16 - Scanning on Demand)\n");
-    printf("Type Lox code. Press Ctrl+D to exit.\n\n");
+    printf("clox REPL (Chapter 17 - Compiling Expressions)\n");
+    printf("Type an expression. Press Ctrl+D to exit.\n\n");
 
     for (;;) {
         printf("> ");
@@ -92,53 +92,25 @@ static void runScanner(std::string_view source) {
 
 // ---- Demo mode ----
 
-static const char* DEMO_SOURCE = R"(
-// Variable declarations
-var x = 10;
-var name = "hello";
-
-// Function
-fun add(a, b) {
-    return a + b;
-}
-
-// Control flow
-if (x >= 5) {
-    print x;
-} else {
-    print "small";
-}
-
-// Loop
-while (x > 0) {
-    x = x - 1;
-}
-
-// Class
-class Point {
-    init(x, y) {
-        this.x = x;
-        this.y = y;
-    }
-}
-)";
+static const char* DEMO_SOURCE = "(-1 + 2) * 3 - -4";
 
 static void runDemo() {
-    printf("=== Compiler Demo (Chapter 16 - Scanning on Demand) ===\n\n");
-    printf("Source code:\n");
-    printf("------------------------------\n");
-    printf("%s", DEMO_SOURCE);
-    printf("------------------------------\n\n");
+    printf("=== Compiler Demo (Chapter 17 - Compiling Expressions) ===\n\n");
+    printf("Expression: %s\n", DEMO_SOURCE);
+    printf("Expected:   7\n\n");
 
-    printf("Compiler output (token type ID + lexeme):\n");
-    printf("------------------------------\n");
-    compile(DEMO_SOURCE);
-    printf("------------------------------\n\n");
-
-    printf("Scanner output (token type name + lexeme):\n");
+    printf("Scanner output:\n");
     printf("------------------------------\n");
     runScanner(DEMO_SOURCE);
+    printf("------------------------------\n\n");
+
+    printf("Compilation + Execution:\n");
     printf("------------------------------\n");
+    VM vm;
+    InterpretResult result = vm.interpret(DEMO_SOURCE);
+    printf("------------------------------\n");
+    printf("Result: %s\n",
+           result == InterpretResult::INTERPRET_OK ? "OK" : "ERROR");
 }
 
 // ---- Debug mode ----
@@ -162,11 +134,15 @@ static void runDebug(const char* path) {
     runScanner(source);
     printf("------------------------------\n\n");
 
-    printf("Step 2: Compiler pass\n");
+    printf("Step 2: Compile + Execute\n");
     printf("------------------------------\n");
-    bool ok = compile(source);
+    VM vm;
+    InterpretResult result = vm.interpret(std::string_view(source));
     printf("------------------------------\n");
-    printf("Compilation %s\n\n", ok ? "succeeded" : "FAILED (had errors)");
+    printf("Result: %s\n",
+           result == InterpretResult::INTERPRET_OK ? "OK" :
+           result == InterpretResult::INTERPRET_COMPILE_ERROR ? "COMPILE ERROR" :
+           "RUNTIME ERROR");
 }
 
 // ---- Self-tests ----
@@ -175,12 +151,15 @@ static int tests_run = 0;
 static int tests_passed = 0;
 static FILE* devnull_ = nullptr;
 static FILE* saved_stdout_ = nullptr;
+static FILE* saved_stderr_ = nullptr;
 
 static void suppress_output() {
     if (!devnull_) devnull_ = fopen("/dev/null", "w");
     if (devnull_) {
         saved_stdout_ = stdout;
         stdout = devnull_;
+        saved_stderr_ = stderr;
+        stderr = devnull_;
     }
 }
 
@@ -189,63 +168,76 @@ static void restore_output() {
         stdout = saved_stdout_;
         saved_stdout_ = nullptr;
     }
+    if (saved_stderr_) {
+        stderr = saved_stderr_;
+        saved_stderr_ = nullptr;
+    }
 }
 
 #define RUN_SELF_TEST(name) do { \
-    fprintf(saved_stdout_ ? saved_stdout_ : stdout, \
-            "  %-40s ", #name); \
+    FILE* out = saved_stdout_ ? saved_stdout_ : stdout; \
+    fprintf(out, "  %-40s ", #name); \
     tests_run++; \
     if (name()) { \
         tests_passed++; \
-        fprintf(saved_stdout_ ? saved_stdout_ : stdout, "PASS\n"); \
+        fprintf(out, "PASS\n"); \
     } else { \
-        fprintf(saved_stdout_ ? saved_stdout_ : stdout, "FAIL\n"); \
+        fprintf(out, "FAIL\n"); \
     } \
 } while(0)
 
-static bool test_compile_empty() {
-    return compile("");
+// Expression compilation tests
+static bool test_compile_number() {
+    Chunk chunk;
+    return compile("42", chunk);
 }
 
-static bool test_compile_simple_expression() {
-    return compile("1 + 2;");
+static bool test_compile_arithmetic() {
+    Chunk chunk;
+    return compile("1 + 2 * 3", chunk);
 }
 
-static bool test_compile_keywords() {
-    return compile("var x = true; if (x) print x; while (false) nil;");
+static bool test_compile_negation() {
+    Chunk chunk;
+    return compile("-42", chunk);
 }
 
-static bool test_compile_string_literal() {
-    return compile("\"hello world\"");
+static bool test_compile_grouping() {
+    Chunk chunk;
+    return compile("(1 + 2) * 3", chunk);
 }
 
-static bool test_compile_error_unterminated_string() {
-    return !compile("\"oops");
+static bool test_compile_complex() {
+    Chunk chunk;
+    return compile("(-1 + 2) * 3 - -4", chunk);
+}
+
+// Error tests
+static bool test_compile_error_empty() {
+    Chunk chunk;
+    return !compile("", chunk);
 }
 
 static bool test_compile_error_unexpected_char() {
-    return !compile("@");
+    Chunk chunk;
+    return !compile("@", chunk);
 }
 
-static bool test_compile_multiline() {
-    return compile("var a = 1;\nvar b = 2;\nprint a + b;");
+static bool test_compile_error_missing_paren() {
+    Chunk chunk;
+    return !compile("(1 + 2", chunk);
 }
 
-static bool test_compile_comments() {
-    return compile("var x = 1; // this is a comment\nvar y = 2;");
-}
-
-static bool test_compile_class_definition() {
-    return compile("class Foo { init() { this.x = 0; } }");
-}
-
-static bool test_compile_function_definition() {
-    return compile("fun greet(name) { print name; return nil; }");
-}
-
-static bool test_vm_interpret_source() {
+// VM tests
+static bool test_vm_interpret_expression() {
     VM vm;
-    InterpretResult result = vm.interpret("var x = 42;");
+    InterpretResult result = vm.interpret("1 + 2");
+    return result == InterpretResult::INTERPRET_OK;
+}
+
+static bool test_vm_interpret_complex() {
+    VM vm;
+    InterpretResult result = vm.interpret("(-1 + 2) * 3 - -4");
     return result == InterpretResult::INTERPRET_OK;
 }
 
@@ -261,28 +253,35 @@ static bool test_vm_interpret_chunk_still_works() {
     return result == InterpretResult::INTERPRET_OK;
 }
 
+static bool test_vm_error_on_bad_source() {
+    VM vm;
+    InterpretResult result = vm.interpret("@@@");
+    return result == InterpretResult::INTERPRET_COMPILE_ERROR;
+}
+
 static void runTests() {
-    printf("=== Compiler & VM Self-Tests ===\n\n");
+    printf("=== Compiler & VM Self-Tests (Chapter 17) ===\n\n");
     printf("Compiler tests:\n");
 
-    // Suppress compile() token output, but keep test names visible
     suppress_output();
 
-    RUN_SELF_TEST(test_compile_empty);
-    RUN_SELF_TEST(test_compile_simple_expression);
-    RUN_SELF_TEST(test_compile_keywords);
-    RUN_SELF_TEST(test_compile_string_literal);
-    RUN_SELF_TEST(test_compile_error_unterminated_string);
-    RUN_SELF_TEST(test_compile_error_unexpected_char);
-    RUN_SELF_TEST(test_compile_multiline);
-    RUN_SELF_TEST(test_compile_comments);
-    RUN_SELF_TEST(test_compile_class_definition);
-    RUN_SELF_TEST(test_compile_function_definition);
+    RUN_SELF_TEST(test_compile_number);
+    RUN_SELF_TEST(test_compile_arithmetic);
+    RUN_SELF_TEST(test_compile_negation);
+    RUN_SELF_TEST(test_compile_grouping);
+    RUN_SELF_TEST(test_compile_complex);
 
-    fprintf(saved_stdout_ ? saved_stdout_ : stdout,
-            "\nVM source-interpret tests:\n");
-    RUN_SELF_TEST(test_vm_interpret_source);
+    FILE* out = saved_stdout_ ? saved_stdout_ : stdout;
+    fprintf(out, "\nError tests:\n");
+    RUN_SELF_TEST(test_compile_error_empty);
+    RUN_SELF_TEST(test_compile_error_unexpected_char);
+    RUN_SELF_TEST(test_compile_error_missing_paren);
+
+    fprintf(out, "\nVM tests:\n");
+    RUN_SELF_TEST(test_vm_interpret_expression);
+    RUN_SELF_TEST(test_vm_interpret_complex);
     RUN_SELF_TEST(test_vm_interpret_chunk_still_works);
+    RUN_SELF_TEST(test_vm_error_on_bad_source);
 
     restore_output();
 
@@ -299,7 +298,7 @@ static void printUsage() {
     printf("Usage: clox [options] [file]\n\n");
     printf("Options:\n");
     printf("  <file>           Execute a .lox source file\n");
-    printf("  --demo           Run demo with sample Lox code\n");
+    printf("  --demo           Run demo with sample expression\n");
     printf("  --scan [file]    Scan-only mode (print named tokens)\n");
     printf("  --debug [file]   Debug mode (scanner + compiler verbose output)\n");
     printf("  --test           Run built-in self-tests\n");

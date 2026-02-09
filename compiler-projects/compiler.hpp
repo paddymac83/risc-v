@@ -1,13 +1,11 @@
 #ifndef COMPILER_HPP
 #define COMPILER_HPP
 
+#include "chunk.hpp"
 #include <string_view>
 
-// Compile source code. At this stage (Chapter 16 - Scanning on Demand),
-// the compiler scans tokens and prints them. In later chapters, this will
-// produce bytecode in a Chunk.
-//
+// Compile a single expression from source code into bytecode.
 // Returns true if compilation succeeded (no errors), false otherwise.
-bool compile(std::string_view source);
+bool compile(std::string_view source, Chunk& chunk);
 
 #endif // COMPILER_HPP

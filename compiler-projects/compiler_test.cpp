@@ -3,7 +3,6 @@
 #include "chunk.hpp"
 #include <cassert>
 #include <cstdio>
-#include <cstring>
 
 // Test framework matching the project's existing style
 static int tests_run = 0;
@@ -18,15 +17,18 @@ static int tests_passed = 0;
     printf("PASSED\n"); \
 } while(0)
 
-// Redirect stdout to suppress compile() output during tests
+// Redirect stdout and stderr to suppress compile()/VM output during tests
 static FILE* devnull = nullptr;
 static FILE* real_stdout = nullptr;
+static FILE* real_stderr = nullptr;
 
 static void suppress_output() {
     if (!devnull) devnull = fopen("/dev/null", "w");
     if (devnull) {
         real_stdout = stdout;
         stdout = devnull;
+        real_stderr = stderr;
+        stderr = devnull;
     }
 }
 
@@ -35,174 +37,231 @@ static void restore_output() {
         stdout = real_stdout;
         real_stdout = nullptr;
     }
+    if (real_stderr) {
+        stderr = real_stderr;
+        real_stderr = nullptr;
+    }
 }
 
-// ---- Compiler tests ----
+// ---- Expression compilation tests (should succeed) ----
 
-TEST(test_compile_empty_string) {
+TEST(test_compile_number) {
+    Chunk chunk;
     suppress_output();
-    bool result = compile("");
-    restore_output();
-    assert(result && "Empty source should compile successfully");
-}
-
-TEST(test_compile_single_token) {
-    suppress_output();
-    bool result = compile("42");
+    bool result = compile("42", chunk);
     restore_output();
     assert(result && "Single number should compile");
 }
 
-TEST(test_compile_operators) {
+TEST(test_compile_decimal) {
+    Chunk chunk;
     suppress_output();
-    bool result = compile("1 + 2 - 3 * 4 / 5");
+    bool result = compile("3.14", chunk);
     restore_output();
-    assert(result && "Arithmetic operators should compile");
+    assert(result && "Decimal number should compile");
 }
 
-TEST(test_compile_comparison_operators) {
+TEST(test_compile_addition) {
+    Chunk chunk;
     suppress_output();
-    bool result = compile("1 < 2 <= 3 > 4 >= 5 == 6 != 7");
+    bool result = compile("1 + 2", chunk);
     restore_output();
-    assert(result && "Comparison operators should compile");
+    assert(result && "Addition should compile");
 }
 
-TEST(test_compile_all_keywords) {
+TEST(test_compile_subtraction) {
+    Chunk chunk;
     suppress_output();
-    bool result = compile(
-        "and class else false for fun if nil or "
-        "print return super this true var while"
-    );
+    bool result = compile("5 - 3", chunk);
     restore_output();
-    assert(result && "All keywords should compile without error");
+    assert(result && "Subtraction should compile");
 }
 
-TEST(test_compile_string_literal) {
+TEST(test_compile_multiplication) {
+    Chunk chunk;
     suppress_output();
-    bool result = compile("\"hello world\"");
+    bool result = compile("2 * 3", chunk);
     restore_output();
-    assert(result && "String literal should compile");
+    assert(result && "Multiplication should compile");
 }
 
-TEST(test_compile_empty_string_literal) {
+TEST(test_compile_division) {
+    Chunk chunk;
     suppress_output();
-    bool result = compile("\"\"");
+    bool result = compile("10 / 2", chunk);
     restore_output();
-    assert(result && "Empty string literal should compile");
+    assert(result && "Division should compile");
 }
 
-TEST(test_compile_identifiers) {
+TEST(test_compile_negate) {
+    Chunk chunk;
     suppress_output();
-    bool result = compile("foo bar _baz quux123");
+    bool result = compile("-5", chunk);
     restore_output();
-    assert(result && "Identifiers should compile");
+    assert(result && "Unary negation should compile");
 }
 
-TEST(test_compile_var_declaration) {
+TEST(test_compile_grouping) {
+    Chunk chunk;
     suppress_output();
-    bool result = compile("var x = 10;");
+    bool result = compile("(1 + 2)", chunk);
     restore_output();
-    assert(result && "Variable declaration should compile");
+    assert(result && "Grouped expression should compile");
 }
 
-TEST(test_compile_function_definition) {
+TEST(test_compile_nested_grouping) {
+    Chunk chunk;
     suppress_output();
-    bool result = compile("fun add(a, b) { return a + b; }");
+    bool result = compile("(((42)))", chunk);
     restore_output();
-    assert(result && "Function definition should compile");
+    assert(result && "Nested grouping should compile");
 }
 
-TEST(test_compile_class_definition) {
+TEST(test_compile_precedence) {
+    Chunk chunk;
     suppress_output();
-    bool result = compile("class Point { init(x, y) { this.x = x; this.y = y; } }");
+    bool result = compile("2 + 3 * 4", chunk);
     restore_output();
-    assert(result && "Class definition should compile");
+    assert(result && "Precedence expression should compile");
 }
 
-TEST(test_compile_if_else) {
+TEST(test_compile_complex) {
+    Chunk chunk;
     suppress_output();
-    bool result = compile("if (true) print 1; else print 2;");
+    bool result = compile("(-1 + 2) * 3 - -4", chunk);
     restore_output();
-    assert(result && "If-else should compile");
+    assert(result && "Complex expression should compile");
 }
 
-TEST(test_compile_while_loop) {
+// ---- Bytecode verification tests ----
+
+TEST(test_bytecode_number) {
+    // "42" -> OP_CONSTANT 0, OP_RETURN
+    Chunk chunk;
     suppress_output();
-    bool result = compile("while (true) { print 1; }");
+    bool result = compile("42", chunk);
     restore_output();
-    assert(result && "While loop should compile");
+    assert(result);
+    assert(chunk.count() == 3); // OP_CONSTANT, index, OP_RETURN
+    assert(chunk.code(0) == static_cast<uint8_t>(OpCode::OP_CONSTANT));
+    assert(chunk.code(1) == 0);
+    assert(chunk.constant(0) == 42.0);
+    assert(chunk.code(2) == static_cast<uint8_t>(OpCode::OP_RETURN));
 }
 
-TEST(test_compile_for_loop) {
+TEST(test_bytecode_binary) {
+    // "1 + 2" -> OP_CONSTANT 0, OP_CONSTANT 1, OP_ADD, OP_RETURN
+    Chunk chunk;
     suppress_output();
-    bool result = compile("for (var i = 0; i < 10; i = i + 1) print i;");
+    bool result = compile("1 + 2", chunk);
     restore_output();
-    assert(result && "For loop should compile");
+    assert(result);
+    assert(chunk.count() == 6); // 2 constants (2 bytes each) + ADD + RETURN
+    assert(chunk.code(0) == static_cast<uint8_t>(OpCode::OP_CONSTANT));
+    assert(chunk.constant(static_cast<size_t>(chunk.code(1))) == 1.0);
+    assert(chunk.code(2) == static_cast<uint8_t>(OpCode::OP_CONSTANT));
+    assert(chunk.constant(static_cast<size_t>(chunk.code(3))) == 2.0);
+    assert(chunk.code(4) == static_cast<uint8_t>(OpCode::OP_ADD));
+    assert(chunk.code(5) == static_cast<uint8_t>(OpCode::OP_RETURN));
 }
 
-TEST(test_compile_multiline) {
+TEST(test_bytecode_negate) {
+    // "-5" -> OP_CONSTANT 0, OP_NEGATE, OP_RETURN
+    Chunk chunk;
     suppress_output();
-    bool result = compile("var a = 1;\nvar b = 2;\nvar c = a + b;");
+    bool result = compile("-5", chunk);
     restore_output();
-    assert(result && "Multiline source should compile");
+    assert(result);
+    assert(chunk.count() == 4);
+    assert(chunk.code(0) == static_cast<uint8_t>(OpCode::OP_CONSTANT));
+    assert(chunk.constant(0) == 5.0);
+    assert(chunk.code(2) == static_cast<uint8_t>(OpCode::OP_NEGATE));
+    assert(chunk.code(3) == static_cast<uint8_t>(OpCode::OP_RETURN));
 }
 
-TEST(test_compile_comments_ignored) {
+TEST(test_bytecode_precedence) {
+    // "2 + 3 * 4" should compile as 2, 3, 4, *, + (not 2, 3, +, 4, *)
+    Chunk chunk;
     suppress_output();
-    bool result = compile("var x = 1; // comment\nvar y = 2;");
+    bool result = compile("2 + 3 * 4", chunk);
     restore_output();
-    assert(result && "Source with comments should compile");
+    assert(result);
+    // OP_CONSTANT 0(2), OP_CONSTANT 1(3), OP_CONSTANT 2(4),
+    // OP_MULTIPLY, OP_ADD, OP_RETURN
+    assert(chunk.count() == 9);
+    assert(chunk.code(6) == static_cast<uint8_t>(OpCode::OP_MULTIPLY));
+    assert(chunk.code(7) == static_cast<uint8_t>(OpCode::OP_ADD));
 }
 
-TEST(test_compile_nested_braces) {
+// ---- Error tests (should fail) ----
+
+TEST(test_compile_error_empty) {
+    Chunk chunk;
     suppress_output();
-    bool result = compile("{ { { } } }");
+    bool result = compile("", chunk);
     restore_output();
-    assert(result && "Nested braces should compile");
+    assert(!result && "Empty source should fail (no expression)");
 }
 
-// ---- Error cases ----
-
-TEST(test_compile_unterminated_string) {
+TEST(test_compile_error_unexpected_token) {
+    Chunk chunk;
     suppress_output();
-    bool result = compile("\"oops");
+    bool result = compile("var", chunk);
     restore_output();
-    assert(!result && "Unterminated string should fail");
+    assert(!result && "Keyword alone should fail");
 }
 
-TEST(test_compile_unexpected_character) {
+TEST(test_compile_error_missing_paren) {
+    Chunk chunk;
     suppress_output();
-    bool result = compile("@");
+    bool result = compile("(1 + 2", chunk);
+    restore_output();
+    assert(!result && "Missing closing paren should fail");
+}
+
+TEST(test_compile_error_unexpected_char) {
+    Chunk chunk;
+    suppress_output();
+    bool result = compile("@", chunk);
     restore_output();
     assert(!result && "Unexpected character should fail");
 }
 
-TEST(test_compile_multiple_errors) {
+TEST(test_compile_error_unterminated_string) {
+    Chunk chunk;
     suppress_output();
-    bool result = compile("@ # $");
+    bool result = compile("\"oops", chunk);
     restore_output();
-    assert(!result && "Multiple unexpected characters should fail");
+    assert(!result && "Unterminated string should fail");
 }
 
-// ---- VM source-interpret integration tests ----
+// ---- VM integration tests ----
 
-TEST(test_vm_interpret_source) {
+TEST(test_vm_compile_and_run) {
     suppress_output();
     VM vm;
-    InterpretResult result = vm.interpret("var x = 42;");
+    InterpretResult result = vm.interpret("1 + 2");
     restore_output();
     assert(result == InterpretResult::INTERPRET_OK);
 }
 
-TEST(test_vm_interpret_empty_source) {
+TEST(test_vm_complex_expression) {
     suppress_output();
     VM vm;
-    InterpretResult result = vm.interpret("");
+    InterpretResult result = vm.interpret("(-1 + 2) * 3 - -4");
     restore_output();
     assert(result == InterpretResult::INTERPRET_OK);
 }
 
-TEST(test_vm_chunk_interpret_still_works) {
+TEST(test_vm_error_on_bad_source) {
+    suppress_output();
+    VM vm;
+    InterpretResult result = vm.interpret("@@@");
+    restore_output();
+    assert(result == InterpretResult::INTERPRET_COMPILE_ERROR);
+}
+
+TEST(test_vm_chunk_still_works) {
     // The old Chunk*-based interpret path should still function
     Chunk chunk;
     int c = chunk.addConstant(42.0);
@@ -218,36 +277,39 @@ TEST(test_vm_chunk_interpret_still_works) {
 }
 
 int main() {
-    printf("=== Compiler Unit Tests ===\n\n");
+    printf("=== Compiler Unit Tests (Chapter 17 - Compiling Expressions) ===\n\n");
 
-    // Compiler tests
-    RUN_TEST(test_compile_empty_string);
-    RUN_TEST(test_compile_single_token);
-    RUN_TEST(test_compile_operators);
-    RUN_TEST(test_compile_comparison_operators);
-    RUN_TEST(test_compile_all_keywords);
-    RUN_TEST(test_compile_string_literal);
-    RUN_TEST(test_compile_empty_string_literal);
-    RUN_TEST(test_compile_identifiers);
-    RUN_TEST(test_compile_var_declaration);
-    RUN_TEST(test_compile_function_definition);
-    RUN_TEST(test_compile_class_definition);
-    RUN_TEST(test_compile_if_else);
-    RUN_TEST(test_compile_while_loop);
-    RUN_TEST(test_compile_for_loop);
-    RUN_TEST(test_compile_multiline);
-    RUN_TEST(test_compile_comments_ignored);
-    RUN_TEST(test_compile_nested_braces);
+    // Expression compilation
+    RUN_TEST(test_compile_number);
+    RUN_TEST(test_compile_decimal);
+    RUN_TEST(test_compile_addition);
+    RUN_TEST(test_compile_subtraction);
+    RUN_TEST(test_compile_multiplication);
+    RUN_TEST(test_compile_division);
+    RUN_TEST(test_compile_negate);
+    RUN_TEST(test_compile_grouping);
+    RUN_TEST(test_compile_nested_grouping);
+    RUN_TEST(test_compile_precedence);
+    RUN_TEST(test_compile_complex);
 
-    // Error tests
-    RUN_TEST(test_compile_unterminated_string);
-    RUN_TEST(test_compile_unexpected_character);
-    RUN_TEST(test_compile_multiple_errors);
+    // Bytecode verification
+    RUN_TEST(test_bytecode_number);
+    RUN_TEST(test_bytecode_binary);
+    RUN_TEST(test_bytecode_negate);
+    RUN_TEST(test_bytecode_precedence);
 
-    // VM integration tests
-    RUN_TEST(test_vm_interpret_source);
-    RUN_TEST(test_vm_interpret_empty_source);
-    RUN_TEST(test_vm_chunk_interpret_still_works);
+    // Error cases
+    RUN_TEST(test_compile_error_empty);
+    RUN_TEST(test_compile_error_unexpected_token);
+    RUN_TEST(test_compile_error_missing_paren);
+    RUN_TEST(test_compile_error_unexpected_char);
+    RUN_TEST(test_compile_error_unterminated_string);
+
+    // VM integration
+    RUN_TEST(test_vm_compile_and_run);
+    RUN_TEST(test_vm_complex_expression);
+    RUN_TEST(test_vm_error_on_bad_source);
+    RUN_TEST(test_vm_chunk_still_works);
 
     printf("\n=== Results: %d/%d tests passed ===\n", tests_passed, tests_run);
 
