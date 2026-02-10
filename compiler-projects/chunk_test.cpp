@@ -36,30 +36,30 @@ TEST(test_write_byte) {
 
 TEST(test_add_constant) {
     Chunk chunk;
-    int index = chunk.addConstant(1.2);
+    int index = chunk.addConstant(NUMBER_VAL(1.2));
 
     assert(index == 0);
     assert(chunk.constants().size() == 1);
-    assert(chunk.constant(0) == 1.2);
+    assert(AS_NUMBER(chunk.constant(0)) == 1.2);
 }
 
 TEST(test_multiple_constants) {
     Chunk chunk;
-    int idx0 = chunk.addConstant(1.0);
-    int idx1 = chunk.addConstant(2.0);
-    int idx2 = chunk.addConstant(3.0);
+    int idx0 = chunk.addConstant(NUMBER_VAL(1.0));
+    int idx1 = chunk.addConstant(NUMBER_VAL(2.0));
+    int idx2 = chunk.addConstant(NUMBER_VAL(3.0));
 
     assert(idx0 == 0);
     assert(idx1 == 1);
     assert(idx2 == 2);
-    assert(chunk.constant(0) == 1.0);
-    assert(chunk.constant(1) == 2.0);
-    assert(chunk.constant(2) == 3.0);
+    assert(AS_NUMBER(chunk.constant(0)) == 1.0);
+    assert(AS_NUMBER(chunk.constant(1)) == 2.0);
+    assert(AS_NUMBER(chunk.constant(2)) == 3.0);
 }
 
 TEST(test_write_constant_instruction) {
     Chunk chunk;
-    int constantIdx = chunk.addConstant(42.0);
+    int constantIdx = chunk.addConstant(NUMBER_VAL(42.0));
 
     chunk.write(static_cast<uint8_t>(OpCode::OP_CONSTANT), 1);
     chunk.write(static_cast<uint8_t>(constantIdx), 1);
@@ -91,7 +91,7 @@ TEST(test_opcode_names) {
 
 TEST(test_disassemble) {
     Chunk chunk;
-    int constantIdx = chunk.addConstant(1.2);
+    int constantIdx = chunk.addConstant(NUMBER_VAL(1.2));
     chunk.write(static_cast<uint8_t>(OpCode::OP_CONSTANT), 123);
     chunk.write(static_cast<uint8_t>(constantIdx), 123);
     chunk.write(static_cast<uint8_t>(OpCode::OP_RETURN), 123);

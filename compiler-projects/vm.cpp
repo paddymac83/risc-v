@@ -2,6 +2,7 @@
 #include "compiler.hpp"
 #include "debug.hpp"
 #include <cstdio>
+#include <cstdarg>
 
 VM::VM() : chunk_(nullptr), ip_(nullptr), stackTop_(nullptr) {
     resetStack();
@@ -19,6 +20,23 @@ void VM::push(Value value) {
 Value VM::pop() {
     stackTop_--;
     return *stackTop_;
+}
+
+void VM::runtimeError(const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    vfprintf(stderr, format, args);
+    va_end(args);
+    fputs("\n", stderr);
+
+    size_t instruction = ip_ - chunk_->code().data() - 1;
+    int line = chunk_->line(instruction);
+    fprintf(stderr, "[line %d] in script\n", line);
+    resetStack();
+}
+
+bool VM::isFalsey(Value value) {
+    return IS_NIL(value) || (IS_BOOL(value) && !AS_BOOL(value));
 }
 
 InterpretResult VM::interpret(std::string_view source) {
@@ -41,11 +59,15 @@ InterpretResult VM::interpret(Chunk* chunk) {
 InterpretResult VM::run() {
 #define READ_BYTE() (*ip_++)
 #define READ_CONSTANT() (chunk_->constant(READ_BYTE()))
-#define BINARY_OP(op) \
+#define BINARY_OP(valueType, op) \
     do { \
-        double b = pop(); \
-        double a = pop(); \
-        push(a op b); \
+        if (!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))) { \
+            runtimeError("Operands must be numbers."); \
+            return InterpretResult::INTERPRET_RUNTIME_ERROR; \
+        } \
+        double b = AS_NUMBER(pop()); \
+        double a = AS_NUMBER(pop()); \
+        push(valueType(a op b)); \
     } while (false)
 
     for (;;) {
@@ -69,12 +91,30 @@ InterpretResult VM::run() {
                 push(constant);
                 break;
             }
-            case static_cast<uint8_t>(OpCode::OP_ADD):      BINARY_OP(+); break;
-            case static_cast<uint8_t>(OpCode::OP_SUBTRACT): BINARY_OP(-); break;
-            case static_cast<uint8_t>(OpCode::OP_MULTIPLY): BINARY_OP(*); break;
-            case static_cast<uint8_t>(OpCode::OP_DIVIDE):   BINARY_OP(/); break;
+            case static_cast<uint8_t>(OpCode::OP_NIL):   push(NIL_VAL()); break;
+            case static_cast<uint8_t>(OpCode::OP_TRUE):  push(BOOL_VAL(true)); break;
+            case static_cast<uint8_t>(OpCode::OP_FALSE): push(BOOL_VAL(false)); break;
+            case static_cast<uint8_t>(OpCode::OP_EQUAL): {
+                Value b = pop();
+                Value a = pop();
+                push(BOOL_VAL(valuesEqual(a, b)));
+                break;
+            }
+            case static_cast<uint8_t>(OpCode::OP_GREATER): BINARY_OP(BOOL_VAL, >); break;
+            case static_cast<uint8_t>(OpCode::OP_LESS):    BINARY_OP(BOOL_VAL, <); break;
+            case static_cast<uint8_t>(OpCode::OP_ADD):      BINARY_OP(NUMBER_VAL, +); break;
+            case static_cast<uint8_t>(OpCode::OP_SUBTRACT): BINARY_OP(NUMBER_VAL, -); break;
+            case static_cast<uint8_t>(OpCode::OP_MULTIPLY): BINARY_OP(NUMBER_VAL, *); break;
+            case static_cast<uint8_t>(OpCode::OP_DIVIDE):   BINARY_OP(NUMBER_VAL, /); break;
+            case static_cast<uint8_t>(OpCode::OP_NOT):
+                push(BOOL_VAL(isFalsey(pop())));
+                break;
             case static_cast<uint8_t>(OpCode::OP_NEGATE): {
-                push(-pop());
+                if (!IS_NUMBER(peek(0))) {
+                    runtimeError("Operand must be a number.");
+                    return InterpretResult::INTERPRET_RUNTIME_ERROR;
+                }
+                push(NUMBER_VAL(-AS_NUMBER(pop())));
                 break;
             }
             case static_cast<uint8_t>(OpCode::OP_RETURN): {

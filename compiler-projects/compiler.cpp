@@ -141,7 +141,16 @@ static void parsePrecedence(Precedence precedence);
 
 static void number() {
     double value = strtod(parser.previous.lexeme.data(), nullptr);
-    emitConstant(value);
+    emitConstant(NUMBER_VAL(value));
+}
+
+static void literal() {
+    switch (parser.previous.type) {
+        case TokenType::FALSE: emitByte(static_cast<uint8_t>(OpCode::OP_FALSE)); break;
+        case TokenType::NIL:   emitByte(static_cast<uint8_t>(OpCode::OP_NIL)); break;
+        case TokenType::TRUE:  emitByte(static_cast<uint8_t>(OpCode::OP_TRUE)); break;
+        default: return; // Unreachable.
+    }
 }
 
 static void grouping() {
@@ -157,6 +166,9 @@ static void unary() {
 
     // Emit the operator instruction.
     switch (operatorType) {
+        case TokenType::BANG:
+            emitByte(static_cast<uint8_t>(OpCode::OP_NOT));
+            break;
         case TokenType::MINUS:
             emitByte(static_cast<uint8_t>(OpCode::OP_NEGATE));
             break;
@@ -171,6 +183,21 @@ static void binary() {
         static_cast<Precedence>(static_cast<int>(rule->precedence) + 1));
 
     switch (operatorType) {
+        case TokenType::BANG_EQUAL:
+            emitBytes(static_cast<uint8_t>(OpCode::OP_EQUAL),
+                      static_cast<uint8_t>(OpCode::OP_NOT)); break;
+        case TokenType::EQUAL_EQUAL:
+            emitByte(static_cast<uint8_t>(OpCode::OP_EQUAL)); break;
+        case TokenType::GREATER:
+            emitByte(static_cast<uint8_t>(OpCode::OP_GREATER)); break;
+        case TokenType::GREATER_EQUAL:
+            emitBytes(static_cast<uint8_t>(OpCode::OP_LESS),
+                      static_cast<uint8_t>(OpCode::OP_NOT)); break;
+        case TokenType::LESS:
+            emitByte(static_cast<uint8_t>(OpCode::OP_LESS)); break;
+        case TokenType::LESS_EQUAL:
+            emitBytes(static_cast<uint8_t>(OpCode::OP_GREATER),
+                      static_cast<uint8_t>(OpCode::OP_NOT)); break;
         case TokenType::PLUS:
             emitByte(static_cast<uint8_t>(OpCode::OP_ADD)); break;
         case TokenType::MINUS:
@@ -196,31 +223,31 @@ static ParseRule rules[] = {
     /* SEMICOLON     */ {nullptr,  nullptr, Precedence::PREC_NONE},
     /* SLASH         */ {nullptr,  binary,  Precedence::PREC_FACTOR},
     /* STAR          */ {nullptr,  binary,  Precedence::PREC_FACTOR},
-    /* BANG          */ {nullptr,  nullptr, Precedence::PREC_NONE},
-    /* BANG_EQUAL    */ {nullptr,  nullptr, Precedence::PREC_NONE},
+    /* BANG          */ {unary,    nullptr, Precedence::PREC_NONE},
+    /* BANG_EQUAL    */ {nullptr,  binary,  Precedence::PREC_EQUALITY},
     /* EQUAL         */ {nullptr,  nullptr, Precedence::PREC_NONE},
-    /* EQUAL_EQUAL   */ {nullptr,  nullptr, Precedence::PREC_NONE},
-    /* GREATER       */ {nullptr,  nullptr, Precedence::PREC_NONE},
-    /* GREATER_EQUAL */ {nullptr,  nullptr, Precedence::PREC_NONE},
-    /* LESS          */ {nullptr,  nullptr, Precedence::PREC_NONE},
-    /* LESS_EQUAL    */ {nullptr,  nullptr, Precedence::PREC_NONE},
+    /* EQUAL_EQUAL   */ {nullptr,  binary,  Precedence::PREC_EQUALITY},
+    /* GREATER       */ {nullptr,  binary,  Precedence::PREC_COMPARISON},
+    /* GREATER_EQUAL */ {nullptr,  binary,  Precedence::PREC_COMPARISON},
+    /* LESS          */ {nullptr,  binary,  Precedence::PREC_COMPARISON},
+    /* LESS_EQUAL    */ {nullptr,  binary,  Precedence::PREC_COMPARISON},
     /* IDENTIFIER    */ {nullptr,  nullptr, Precedence::PREC_NONE},
     /* STRING        */ {nullptr,  nullptr, Precedence::PREC_NONE},
     /* NUMBER        */ {number,   nullptr, Precedence::PREC_NONE},
     /* AND           */ {nullptr,  nullptr, Precedence::PREC_NONE},
     /* CLASS         */ {nullptr,  nullptr, Precedence::PREC_NONE},
     /* ELSE          */ {nullptr,  nullptr, Precedence::PREC_NONE},
-    /* FALSE         */ {nullptr,  nullptr, Precedence::PREC_NONE},
+    /* FALSE         */ {literal,  nullptr, Precedence::PREC_NONE},
     /* FOR           */ {nullptr,  nullptr, Precedence::PREC_NONE},
     /* FUN           */ {nullptr,  nullptr, Precedence::PREC_NONE},
     /* IF            */ {nullptr,  nullptr, Precedence::PREC_NONE},
-    /* NIL           */ {nullptr,  nullptr, Precedence::PREC_NONE},
+    /* NIL           */ {literal,  nullptr, Precedence::PREC_NONE},
     /* OR            */ {nullptr,  nullptr, Precedence::PREC_NONE},
     /* PRINT         */ {nullptr,  nullptr, Precedence::PREC_NONE},
     /* RETURN        */ {nullptr,  nullptr, Precedence::PREC_NONE},
     /* SUPER         */ {nullptr,  nullptr, Precedence::PREC_NONE},
     /* THIS          */ {nullptr,  nullptr, Precedence::PREC_NONE},
-    /* TRUE          */ {nullptr,  nullptr, Precedence::PREC_NONE},
+    /* TRUE          */ {literal,  nullptr, Precedence::PREC_NONE},
     /* VAR           */ {nullptr,  nullptr, Precedence::PREC_NONE},
     /* WHILE         */ {nullptr,  nullptr, Precedence::PREC_NONE},
     /* ERROR         */ {nullptr,  nullptr, Precedence::PREC_NONE},

@@ -20,7 +20,7 @@ static int tests_passed = 0;
 
 // Helper: write a constant instruction and return the chunk
 static void emitConstant(Chunk& chunk, double value, int line) {
-    int idx = chunk.addConstant(value);
+    int idx = chunk.addConstant(NUMBER_VAL(value));
     chunk.write(static_cast<uint8_t>(OpCode::OP_CONSTANT), line);
     chunk.write(static_cast<uint8_t>(idx), line);
 }
@@ -31,14 +31,14 @@ static void emitOp(Chunk& chunk, OpCode op, int line) {
 
 TEST(test_vm_push_pop) {
     VM vm;
-    vm.push(1.0);
-    vm.push(2.0);
-    vm.push(3.0);
+    vm.push(NUMBER_VAL(1.0));
+    vm.push(NUMBER_VAL(2.0));
+    vm.push(NUMBER_VAL(3.0));
 
     assert(vm.stackSize() == 3);
-    assert(vm.pop() == 3.0);
-    assert(vm.pop() == 2.0);
-    assert(vm.pop() == 1.0);
+    assert(AS_NUMBER(vm.pop()) == 3.0);
+    assert(AS_NUMBER(vm.pop()) == 2.0);
+    assert(AS_NUMBER(vm.pop()) == 1.0);
     assert(vm.stackSize() == 0);
 }
 
@@ -213,8 +213,116 @@ TEST(test_vm_disassemble_new_opcodes) {
     printf("--- End disassembly ---\n");
 }
 
+// ---- Chapter 18: New value type tests ----
+
+TEST(test_vm_nil_literal) {
+    // OP_NIL, OP_RETURN -> prints "nil"
+    Chunk chunk;
+    emitOp(chunk, OpCode::OP_NIL, 1);
+    emitOp(chunk, OpCode::OP_RETURN, 1);
+
+    VM vm;
+    printf("\n");
+    InterpretResult result = vm.interpret(&chunk);
+    assert(result == InterpretResult::INTERPRET_OK);
+}
+
+TEST(test_vm_bool_literals) {
+    // OP_TRUE, OP_RETURN -> prints "true"
+    Chunk chunk;
+    emitOp(chunk, OpCode::OP_TRUE, 1);
+    emitOp(chunk, OpCode::OP_RETURN, 1);
+
+    VM vm;
+    printf("\n");
+    InterpretResult result = vm.interpret(&chunk);
+    assert(result == InterpretResult::INTERPRET_OK);
+}
+
+TEST(test_vm_not) {
+    // OP_TRUE, OP_NOT, OP_RETURN -> prints "false"
+    Chunk chunk;
+    emitOp(chunk, OpCode::OP_TRUE, 1);
+    emitOp(chunk, OpCode::OP_NOT, 1);
+    emitOp(chunk, OpCode::OP_RETURN, 1);
+
+    VM vm;
+    printf("\n");
+    InterpretResult result = vm.interpret(&chunk);
+    assert(result == InterpretResult::INTERPRET_OK);
+}
+
+TEST(test_vm_equal) {
+    // push 1.0, push 1.0, OP_EQUAL, OP_RETURN -> prints "true"
+    Chunk chunk;
+    emitConstant(chunk, 1.0, 1);
+    emitConstant(chunk, 1.0, 1);
+    emitOp(chunk, OpCode::OP_EQUAL, 1);
+    emitOp(chunk, OpCode::OP_RETURN, 1);
+
+    VM vm;
+    printf("\n");
+    InterpretResult result = vm.interpret(&chunk);
+    assert(result == InterpretResult::INTERPRET_OK);
+}
+
+TEST(test_vm_greater) {
+    // push 3.0, push 1.0, OP_GREATER, OP_RETURN -> prints "true"
+    Chunk chunk;
+    emitConstant(chunk, 3.0, 1);
+    emitConstant(chunk, 1.0, 1);
+    emitOp(chunk, OpCode::OP_GREATER, 1);
+    emitOp(chunk, OpCode::OP_RETURN, 1);
+
+    VM vm;
+    printf("\n");
+    InterpretResult result = vm.interpret(&chunk);
+    assert(result == InterpretResult::INTERPRET_OK);
+}
+
+TEST(test_vm_less) {
+    // push 1.0, push 3.0, OP_LESS, OP_RETURN -> prints "true"
+    Chunk chunk;
+    emitConstant(chunk, 1.0, 1);
+    emitConstant(chunk, 3.0, 1);
+    emitOp(chunk, OpCode::OP_LESS, 1);
+    emitOp(chunk, OpCode::OP_RETURN, 1);
+
+    VM vm;
+    printf("\n");
+    InterpretResult result = vm.interpret(&chunk);
+    assert(result == InterpretResult::INTERPRET_OK);
+}
+
+TEST(test_vm_negate_non_number_error) {
+    // OP_TRUE, OP_NEGATE should produce a runtime error
+    Chunk chunk;
+    emitOp(chunk, OpCode::OP_TRUE, 1);
+    emitOp(chunk, OpCode::OP_NEGATE, 1);
+    emitOp(chunk, OpCode::OP_RETURN, 1);
+
+    VM vm;
+    printf("\n");
+    InterpretResult result = vm.interpret(&chunk);
+    assert(result == InterpretResult::INTERPRET_RUNTIME_ERROR);
+}
+
+TEST(test_vm_add_type_error) {
+    // OP_TRUE, push 1.0, OP_ADD should produce a runtime error
+    Chunk chunk;
+    emitOp(chunk, OpCode::OP_TRUE, 1);
+    emitConstant(chunk, 1.0, 1);
+    emitOp(chunk, OpCode::OP_ADD, 1);
+    emitOp(chunk, OpCode::OP_RETURN, 1);
+
+    VM vm;
+    printf("\n");
+    InterpretResult result = vm.interpret(&chunk);
+    assert(result == InterpretResult::INTERPRET_RUNTIME_ERROR);
+}
+
 int main() {
-    printf("=== VM Unit Tests ===\n\n");
+    printf("=== VM Unit Tests (Chapter 18 - Types of Values) ===\n\n");
 
     RUN_TEST(test_vm_push_pop);
     RUN_TEST(test_vm_constant_return);
@@ -228,6 +336,16 @@ int main() {
     RUN_TEST(test_vm_double_negate);
     RUN_TEST(test_vm_operand_order);
     RUN_TEST(test_vm_disassemble_new_opcodes);
+
+    // Chapter 18 tests
+    RUN_TEST(test_vm_nil_literal);
+    RUN_TEST(test_vm_bool_literals);
+    RUN_TEST(test_vm_not);
+    RUN_TEST(test_vm_equal);
+    RUN_TEST(test_vm_greater);
+    RUN_TEST(test_vm_less);
+    RUN_TEST(test_vm_negate_non_number_error);
+    RUN_TEST(test_vm_add_type_error);
 
     printf("\n=== Results: %d/%d tests passed ===\n", tests_passed, tests_run);
 

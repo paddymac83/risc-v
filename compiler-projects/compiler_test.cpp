@@ -145,7 +145,7 @@ TEST(test_bytecode_number) {
     assert(chunk.count() == 3); // OP_CONSTANT, index, OP_RETURN
     assert(chunk.code(0) == static_cast<uint8_t>(OpCode::OP_CONSTANT));
     assert(chunk.code(1) == 0);
-    assert(chunk.constant(0) == 42.0);
+    assert(AS_NUMBER(chunk.constant(0)) == 42.0);
     assert(chunk.code(2) == static_cast<uint8_t>(OpCode::OP_RETURN));
 }
 
@@ -158,9 +158,9 @@ TEST(test_bytecode_binary) {
     assert(result);
     assert(chunk.count() == 6); // 2 constants (2 bytes each) + ADD + RETURN
     assert(chunk.code(0) == static_cast<uint8_t>(OpCode::OP_CONSTANT));
-    assert(chunk.constant(static_cast<size_t>(chunk.code(1))) == 1.0);
+    assert(AS_NUMBER(chunk.constant(static_cast<size_t>(chunk.code(1)))) == 1.0);
     assert(chunk.code(2) == static_cast<uint8_t>(OpCode::OP_CONSTANT));
-    assert(chunk.constant(static_cast<size_t>(chunk.code(3))) == 2.0);
+    assert(AS_NUMBER(chunk.constant(static_cast<size_t>(chunk.code(3)))) == 2.0);
     assert(chunk.code(4) == static_cast<uint8_t>(OpCode::OP_ADD));
     assert(chunk.code(5) == static_cast<uint8_t>(OpCode::OP_RETURN));
 }
@@ -174,7 +174,7 @@ TEST(test_bytecode_negate) {
     assert(result);
     assert(chunk.count() == 4);
     assert(chunk.code(0) == static_cast<uint8_t>(OpCode::OP_CONSTANT));
-    assert(chunk.constant(0) == 5.0);
+    assert(AS_NUMBER(chunk.constant(0)) == 5.0);
     assert(chunk.code(2) == static_cast<uint8_t>(OpCode::OP_NEGATE));
     assert(chunk.code(3) == static_cast<uint8_t>(OpCode::OP_RETURN));
 }
@@ -264,7 +264,7 @@ TEST(test_vm_error_on_bad_source) {
 TEST(test_vm_chunk_still_works) {
     // The old Chunk*-based interpret path should still function
     Chunk chunk;
-    int c = chunk.addConstant(42.0);
+    int c = chunk.addConstant(NUMBER_VAL(42.0));
     chunk.write(static_cast<uint8_t>(OpCode::OP_CONSTANT), 1);
     chunk.write(static_cast<uint8_t>(c), 1);
     chunk.write(static_cast<uint8_t>(OpCode::OP_RETURN), 1);
@@ -276,8 +276,166 @@ TEST(test_vm_chunk_still_works) {
     assert(result == InterpretResult::INTERPRET_OK);
 }
 
+// ---- Chapter 18: Types of Values tests ----
+
+TEST(test_compile_true) {
+    Chunk chunk;
+    suppress_output();
+    bool result = compile("true", chunk);
+    restore_output();
+    assert(result && "true literal should compile");
+    // Should be OP_TRUE, OP_RETURN
+    assert(chunk.count() == 2);
+    assert(chunk.code(0) == static_cast<uint8_t>(OpCode::OP_TRUE));
+    assert(chunk.code(1) == static_cast<uint8_t>(OpCode::OP_RETURN));
+}
+
+TEST(test_compile_false) {
+    Chunk chunk;
+    suppress_output();
+    bool result = compile("false", chunk);
+    restore_output();
+    assert(result && "false literal should compile");
+    assert(chunk.count() == 2);
+    assert(chunk.code(0) == static_cast<uint8_t>(OpCode::OP_FALSE));
+    assert(chunk.code(1) == static_cast<uint8_t>(OpCode::OP_RETURN));
+}
+
+TEST(test_compile_nil) {
+    Chunk chunk;
+    suppress_output();
+    bool result = compile("nil", chunk);
+    restore_output();
+    assert(result && "nil literal should compile");
+    assert(chunk.count() == 2);
+    assert(chunk.code(0) == static_cast<uint8_t>(OpCode::OP_NIL));
+    assert(chunk.code(1) == static_cast<uint8_t>(OpCode::OP_RETURN));
+}
+
+TEST(test_compile_not) {
+    Chunk chunk;
+    suppress_output();
+    bool result = compile("!true", chunk);
+    restore_output();
+    assert(result && "!true should compile");
+    // OP_TRUE, OP_NOT, OP_RETURN
+    assert(chunk.count() == 3);
+    assert(chunk.code(0) == static_cast<uint8_t>(OpCode::OP_TRUE));
+    assert(chunk.code(1) == static_cast<uint8_t>(OpCode::OP_NOT));
+    assert(chunk.code(2) == static_cast<uint8_t>(OpCode::OP_RETURN));
+}
+
+TEST(test_compile_equality) {
+    Chunk chunk;
+    suppress_output();
+    bool result = compile("1 == 2", chunk);
+    restore_output();
+    assert(result && "Equality should compile");
+}
+
+TEST(test_compile_inequality) {
+    Chunk chunk;
+    suppress_output();
+    bool result = compile("1 != 2", chunk);
+    restore_output();
+    assert(result && "Inequality should compile");
+    // Should emit OP_EQUAL then OP_NOT
+}
+
+TEST(test_compile_less) {
+    Chunk chunk;
+    suppress_output();
+    bool result = compile("1 < 2", chunk);
+    restore_output();
+    assert(result && "Less-than should compile");
+}
+
+TEST(test_compile_greater) {
+    Chunk chunk;
+    suppress_output();
+    bool result = compile("1 > 2", chunk);
+    restore_output();
+    assert(result && "Greater-than should compile");
+}
+
+TEST(test_compile_less_equal) {
+    Chunk chunk;
+    suppress_output();
+    bool result = compile("1 <= 2", chunk);
+    restore_output();
+    assert(result && "Less-or-equal should compile");
+    // Should emit OP_GREATER then OP_NOT
+}
+
+TEST(test_compile_greater_equal) {
+    Chunk chunk;
+    suppress_output();
+    bool result = compile("1 >= 2", chunk);
+    restore_output();
+    assert(result && "Greater-or-equal should compile");
+    // Should emit OP_LESS then OP_NOT
+}
+
+TEST(test_vm_true_literal) {
+    suppress_output();
+    VM vm;
+    InterpretResult result = vm.interpret("true");
+    restore_output();
+    assert(result == InterpretResult::INTERPRET_OK);
+}
+
+TEST(test_vm_nil_literal) {
+    suppress_output();
+    VM vm;
+    InterpretResult result = vm.interpret("nil");
+    restore_output();
+    assert(result == InterpretResult::INTERPRET_OK);
+}
+
+TEST(test_vm_not_false) {
+    suppress_output();
+    VM vm;
+    InterpretResult result = vm.interpret("!false");
+    restore_output();
+    assert(result == InterpretResult::INTERPRET_OK);
+}
+
+TEST(test_vm_comparison) {
+    suppress_output();
+    VM vm;
+    InterpretResult result = vm.interpret("1 < 2");
+    restore_output();
+    assert(result == InterpretResult::INTERPRET_OK);
+}
+
+TEST(test_vm_equality) {
+    suppress_output();
+    VM vm;
+    InterpretResult result = vm.interpret("1 == 1");
+    restore_output();
+    assert(result == InterpretResult::INTERPRET_OK);
+}
+
+TEST(test_vm_negate_bool_error) {
+    // -true should produce a runtime error
+    suppress_output();
+    VM vm;
+    InterpretResult result = vm.interpret("-true");
+    restore_output();
+    assert(result == InterpretResult::INTERPRET_RUNTIME_ERROR);
+}
+
+TEST(test_vm_add_bool_error) {
+    // true + false should produce a runtime error
+    suppress_output();
+    VM vm;
+    InterpretResult result = vm.interpret("true + false");
+    restore_output();
+    assert(result == InterpretResult::INTERPRET_RUNTIME_ERROR);
+}
+
 int main() {
-    printf("=== Compiler Unit Tests (Chapter 17 - Compiling Expressions) ===\n\n");
+    printf("=== Compiler Unit Tests (Chapter 18 - Types of Values) ===\n\n");
 
     // Expression compilation
     RUN_TEST(test_compile_number);
@@ -305,11 +463,31 @@ int main() {
     RUN_TEST(test_compile_error_unexpected_char);
     RUN_TEST(test_compile_error_unterminated_string);
 
-    // VM integration
+    // VM integration (Chapter 17)
     RUN_TEST(test_vm_compile_and_run);
     RUN_TEST(test_vm_complex_expression);
     RUN_TEST(test_vm_error_on_bad_source);
     RUN_TEST(test_vm_chunk_still_works);
+
+    // Chapter 18: Types of Values
+    printf("\n--- Chapter 18: Types of Values ---\n");
+    RUN_TEST(test_compile_true);
+    RUN_TEST(test_compile_false);
+    RUN_TEST(test_compile_nil);
+    RUN_TEST(test_compile_not);
+    RUN_TEST(test_compile_equality);
+    RUN_TEST(test_compile_inequality);
+    RUN_TEST(test_compile_less);
+    RUN_TEST(test_compile_greater);
+    RUN_TEST(test_compile_less_equal);
+    RUN_TEST(test_compile_greater_equal);
+    RUN_TEST(test_vm_true_literal);
+    RUN_TEST(test_vm_nil_literal);
+    RUN_TEST(test_vm_not_false);
+    RUN_TEST(test_vm_comparison);
+    RUN_TEST(test_vm_equality);
+    RUN_TEST(test_vm_negate_bool_error);
+    RUN_TEST(test_vm_add_bool_error);
 
     printf("\n=== Results: %d/%d tests passed ===\n", tests_passed, tests_run);
 

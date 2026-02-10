@@ -40,7 +40,7 @@ static void repl() {
     VM vm;
     std::string line;
 
-    printf("clox REPL (Chapter 17 - Compiling Expressions)\n");
+    printf("clox REPL (Chapter 18 - Types of Values)\n");
     printf("Type an expression. Press Ctrl+D to exit.\n\n");
 
     for (;;) {
@@ -92,12 +92,12 @@ static void runScanner(std::string_view source) {
 
 // ---- Demo mode ----
 
-static const char* DEMO_SOURCE = "(-1 + 2) * 3 - -4";
+static const char* DEMO_SOURCE = "!(5 - 4 > 3 * 2 == !nil)";
 
 static void runDemo() {
-    printf("=== Compiler Demo (Chapter 17 - Compiling Expressions) ===\n\n");
+    printf("=== Compiler Demo (Chapter 18 - Types of Values) ===\n\n");
     printf("Expression: %s\n", DEMO_SOURCE);
-    printf("Expected:   7\n\n");
+    printf("Expected:   true\n\n");
 
     printf("Scanner output:\n");
     printf("------------------------------\n");
@@ -243,7 +243,7 @@ static bool test_vm_interpret_complex() {
 
 static bool test_vm_interpret_chunk_still_works() {
     Chunk chunk;
-    int c = chunk.addConstant(99.0);
+    int c = chunk.addConstant(NUMBER_VAL(99.0));
     chunk.write(static_cast<uint8_t>(OpCode::OP_CONSTANT), 1);
     chunk.write(static_cast<uint8_t>(c), 1);
     chunk.write(static_cast<uint8_t>(OpCode::OP_RETURN), 1);
@@ -260,7 +260,7 @@ static bool test_vm_error_on_bad_source() {
 }
 
 static void runTests() {
-    printf("=== Compiler & VM Self-Tests (Chapter 17) ===\n\n");
+    printf("=== Compiler & VM Self-Tests (Chapter 18) ===\n\n");
     printf("Compiler tests:\n");
 
     suppress_output();

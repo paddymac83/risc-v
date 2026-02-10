@@ -31,9 +31,14 @@ public:
     Value stackTop() const { return stackTop_[-1]; }
     int stackSize() const { return static_cast<int>(stackTop_ - stack_); }
 
+    // Peek at a value on the stack without popping
+    Value peek(int distance) const { return stackTop_[-1 - distance]; }
+
 private:
     InterpretResult run();
     void resetStack();
+    void runtimeError(const char* format, ...);
+    bool isFalsey(Value value);
 
     Chunk* chunk_;
     uint8_t* ip_;           // Instruction pointer
