@@ -1,8 +1,10 @@
 #include "compiler.hpp"
 #include "vm.hpp"
 #include "chunk.hpp"
+#include "object.hpp"
 #include <cassert>
 #include <cstdio>
+#include <cstring>
 
 // Test framework matching the project's existing style
 static int tests_run = 0;
@@ -434,8 +436,158 @@ TEST(test_vm_add_bool_error) {
     assert(result == InterpretResult::INTERPRET_RUNTIME_ERROR);
 }
 
+// ---- Chapter 19: Strings tests ----
+
+TEST(test_compile_string) {
+    Chunk chunk;
+    Obj* objects = nullptr;
+    setObjectList(&objects);
+    suppress_output();
+    bool result = compile("\"hello\"", chunk);
+    restore_output();
+    assert(result && "String literal should compile");
+    freeObjects(objects);
+    setObjectList(nullptr);
+}
+
+TEST(test_compile_empty_string) {
+    Chunk chunk;
+    Obj* objects = nullptr;
+    setObjectList(&objects);
+    suppress_output();
+    bool result = compile("\"\"", chunk);
+    restore_output();
+    assert(result && "Empty string should compile");
+    freeObjects(objects);
+    setObjectList(nullptr);
+}
+
+TEST(test_compile_string_concat) {
+    Chunk chunk;
+    Obj* objects = nullptr;
+    setObjectList(&objects);
+    suppress_output();
+    bool result = compile("\"foo\" + \"bar\"", chunk);
+    restore_output();
+    assert(result && "String concatenation should compile");
+    freeObjects(objects);
+    setObjectList(nullptr);
+}
+
+TEST(test_bytecode_string) {
+    // "hello" -> OP_CONSTANT 0, OP_RETURN
+    Chunk chunk;
+    Obj* objects = nullptr;
+    setObjectList(&objects);
+    suppress_output();
+    bool result = compile("\"hello\"", chunk);
+    restore_output();
+    assert(result);
+    assert(chunk.count() == 3); // OP_CONSTANT, index, OP_RETURN
+    assert(chunk.code(0) == static_cast<uint8_t>(OpCode::OP_CONSTANT));
+    assert(IS_OBJ(chunk.constant(0)));
+    assert(IS_STRING(chunk.constant(0)));
+    assert(strcmp(AS_CSTRING(chunk.constant(0)), "hello") == 0);
+    assert(chunk.code(2) == static_cast<uint8_t>(OpCode::OP_RETURN));
+    freeObjects(objects);
+    setObjectList(nullptr);
+}
+
+TEST(test_bytecode_string_concat) {
+    // "a" + "b" -> OP_CONSTANT 0, OP_CONSTANT 1, OP_ADD, OP_RETURN
+    Chunk chunk;
+    Obj* objects = nullptr;
+    setObjectList(&objects);
+    suppress_output();
+    bool result = compile("\"a\" + \"b\"", chunk);
+    restore_output();
+    assert(result);
+    assert(chunk.count() == 6);
+    assert(chunk.code(0) == static_cast<uint8_t>(OpCode::OP_CONSTANT));
+    assert(strcmp(AS_CSTRING(chunk.constant(0)), "a") == 0);
+    assert(chunk.code(2) == static_cast<uint8_t>(OpCode::OP_CONSTANT));
+    assert(strcmp(AS_CSTRING(chunk.constant(1)), "b") == 0);
+    assert(chunk.code(4) == static_cast<uint8_t>(OpCode::OP_ADD));
+    assert(chunk.code(5) == static_cast<uint8_t>(OpCode::OP_RETURN));
+    freeObjects(objects);
+    setObjectList(nullptr);
+}
+
+TEST(test_vm_string_literal) {
+    suppress_output();
+    VM vm;
+    InterpretResult result = vm.interpret("\"hello\"");
+    restore_output();
+    assert(result == InterpretResult::INTERPRET_OK);
+}
+
+TEST(test_vm_string_concatenation) {
+    suppress_output();
+    VM vm;
+    InterpretResult result = vm.interpret("\"hello\" + \" world\"");
+    restore_output();
+    assert(result == InterpretResult::INTERPRET_OK);
+}
+
+TEST(test_vm_string_equality_true) {
+    suppress_output();
+    VM vm;
+    InterpretResult result = vm.interpret("\"abc\" == \"abc\"");
+    restore_output();
+    assert(result == InterpretResult::INTERPRET_OK);
+}
+
+TEST(test_vm_string_equality_false) {
+    suppress_output();
+    VM vm;
+    InterpretResult result = vm.interpret("\"abc\" == \"def\"");
+    restore_output();
+    assert(result == InterpretResult::INTERPRET_OK);
+}
+
+TEST(test_vm_string_not_equal_number) {
+    suppress_output();
+    VM vm;
+    // Strings and numbers are never equal (different types)
+    InterpretResult result = vm.interpret("\"1\" == 1");
+    restore_output();
+    assert(result == InterpretResult::INTERPRET_OK);
+}
+
+TEST(test_vm_string_plus_number_error) {
+    suppress_output();
+    VM vm;
+    InterpretResult result = vm.interpret("\"hello\" + 1");
+    restore_output();
+    assert(result == InterpretResult::INTERPRET_RUNTIME_ERROR);
+}
+
+TEST(test_vm_multi_concat) {
+    suppress_output();
+    VM vm;
+    InterpretResult result = vm.interpret("\"a\" + \"b\" + \"c\"");
+    restore_output();
+    assert(result == InterpretResult::INTERPRET_OK);
+}
+
+TEST(test_vm_empty_string) {
+    suppress_output();
+    VM vm;
+    InterpretResult result = vm.interpret("\"\"");
+    restore_output();
+    assert(result == InterpretResult::INTERPRET_OK);
+}
+
+TEST(test_vm_empty_string_concat) {
+    suppress_output();
+    VM vm;
+    InterpretResult result = vm.interpret("\"\" + \"hello\"");
+    restore_output();
+    assert(result == InterpretResult::INTERPRET_OK);
+}
+
 int main() {
-    printf("=== Compiler Unit Tests (Chapter 18 - Types of Values) ===\n\n");
+    printf("=== Compiler Unit Tests (Chapter 19 - Strings) ===\n\n");
 
     // Expression compilation
     RUN_TEST(test_compile_number);
@@ -488,6 +640,23 @@ int main() {
     RUN_TEST(test_vm_equality);
     RUN_TEST(test_vm_negate_bool_error);
     RUN_TEST(test_vm_add_bool_error);
+
+    // Chapter 19: Strings
+    printf("\n--- Chapter 19: Strings ---\n");
+    RUN_TEST(test_compile_string);
+    RUN_TEST(test_compile_empty_string);
+    RUN_TEST(test_compile_string_concat);
+    RUN_TEST(test_bytecode_string);
+    RUN_TEST(test_bytecode_string_concat);
+    RUN_TEST(test_vm_string_literal);
+    RUN_TEST(test_vm_string_concatenation);
+    RUN_TEST(test_vm_string_equality_true);
+    RUN_TEST(test_vm_string_equality_false);
+    RUN_TEST(test_vm_string_not_equal_number);
+    RUN_TEST(test_vm_string_plus_number_error);
+    RUN_TEST(test_vm_multi_concat);
+    RUN_TEST(test_vm_empty_string);
+    RUN_TEST(test_vm_empty_string_concat);
 
     printf("\n=== Results: %d/%d tests passed ===\n", tests_passed, tests_run);
 

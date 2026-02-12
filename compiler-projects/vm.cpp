@@ -1,11 +1,19 @@
 #include "vm.hpp"
 #include "compiler.hpp"
 #include "debug.hpp"
+#include "object.hpp"
 #include <cstdio>
 #include <cstdarg>
+#include <cstring>
 
-VM::VM() : chunk_(nullptr), ip_(nullptr), stackTop_(nullptr) {
+VM::VM() : chunk_(nullptr), ip_(nullptr), stackTop_(nullptr), objects_(nullptr) {
     resetStack();
+}
+
+VM::~VM() {
+    freeObjects(objects_);
+    objects_ = nullptr;
+    setObjectList(nullptr);
 }
 
 void VM::resetStack() {
@@ -39,8 +47,26 @@ bool VM::isFalsey(Value value) {
     return IS_NIL(value) || (IS_BOOL(value) && !AS_BOOL(value));
 }
 
+void VM::concatenate() {
+    ObjString* b = AS_STRING(pop());
+    ObjString* a = AS_STRING(pop());
+
+    int length = a->length + b->length;
+    char* chars = new char[length + 1];
+    memcpy(chars, a->chars, a->length);
+    memcpy(chars + a->length, b->chars, b->length);
+    chars[length] = '\0';
+
+    ObjString* result = takeString(chars, length);
+    push(OBJ_VAL(reinterpret_cast<Obj*>(result)));
+}
+
 InterpretResult VM::interpret(std::string_view source) {
     Chunk chunk;
+
+    // Register our object list so allocations during compilation are tracked
+    setObjectList(&objects_);
+
     if (!compile(source, chunk)) {
         return InterpretResult::INTERPRET_COMPILE_ERROR;
     }
@@ -51,6 +77,9 @@ InterpretResult VM::interpret(std::string_view source) {
 }
 
 InterpretResult VM::interpret(Chunk* chunk) {
+    // Register our object list for any allocations during execution
+    setObjectList(&objects_);
+
     chunk_ = chunk;
     ip_ = const_cast<uint8_t*>(chunk_->code().data());
     return run();
@@ -102,7 +131,20 @@ InterpretResult VM::run() {
             }
             case static_cast<uint8_t>(OpCode::OP_GREATER): BINARY_OP(BOOL_VAL, >); break;
             case static_cast<uint8_t>(OpCode::OP_LESS):    BINARY_OP(BOOL_VAL, <); break;
-            case static_cast<uint8_t>(OpCode::OP_ADD):      BINARY_OP(NUMBER_VAL, +); break;
+            case static_cast<uint8_t>(OpCode::OP_ADD): {
+                if (IS_STRING(peek(0)) && IS_STRING(peek(1))) {
+                    concatenate();
+                } else if (IS_NUMBER(peek(0)) && IS_NUMBER(peek(1))) {
+                    double b = AS_NUMBER(pop());
+                    double a = AS_NUMBER(pop());
+                    push(NUMBER_VAL(a + b));
+                } else {
+                    runtimeError(
+                        "Operands must be two numbers or two strings.");
+                    return InterpretResult::INTERPRET_RUNTIME_ERROR;
+                }
+                break;
+            }
             case static_cast<uint8_t>(OpCode::OP_SUBTRACT): BINARY_OP(NUMBER_VAL, -); break;
             case static_cast<uint8_t>(OpCode::OP_MULTIPLY): BINARY_OP(NUMBER_VAL, *); break;
             case static_cast<uint8_t>(OpCode::OP_DIVIDE):   BINARY_OP(NUMBER_VAL, /); break;

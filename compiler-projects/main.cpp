@@ -40,7 +40,7 @@ static void repl() {
     VM vm;
     std::string line;
 
-    printf("clox REPL (Chapter 18 - Types of Values)\n");
+    printf("clox REPL (Chapter 19 - Strings)\n");
     printf("Type an expression. Press Ctrl+D to exit.\n\n");
 
     for (;;) {
@@ -95,7 +95,7 @@ static void runScanner(std::string_view source) {
 static const char* DEMO_SOURCE = "!(5 - 4 > 3 * 2 == !nil)";
 
 static void runDemo() {
-    printf("=== Compiler Demo (Chapter 18 - Types of Values) ===\n\n");
+    printf("=== Compiler Demo (Chapter 19 - Strings) ===\n\n");
     printf("Expression: %s\n", DEMO_SOURCE);
     printf("Expected:   true\n\n");
 
@@ -259,8 +259,32 @@ static bool test_vm_error_on_bad_source() {
     return result == InterpretResult::INTERPRET_COMPILE_ERROR;
 }
 
+// String tests (Chapter 19)
+static bool test_compile_string() {
+    Chunk chunk;
+    return compile("\"hello\"", chunk);
+}
+
+static bool test_vm_string_literal() {
+    VM vm;
+    InterpretResult result = vm.interpret("\"hello world\"");
+    return result == InterpretResult::INTERPRET_OK;
+}
+
+static bool test_vm_string_concatenation() {
+    VM vm;
+    InterpretResult result = vm.interpret("\"hello\" + \" \" + \"world\"");
+    return result == InterpretResult::INTERPRET_OK;
+}
+
+static bool test_vm_string_type_error() {
+    VM vm;
+    InterpretResult result = vm.interpret("\"hello\" + 1");
+    return result == InterpretResult::INTERPRET_RUNTIME_ERROR;
+}
+
 static void runTests() {
-    printf("=== Compiler & VM Self-Tests (Chapter 18) ===\n\n");
+    printf("=== Compiler & VM Self-Tests (Chapter 19) ===\n\n");
     printf("Compiler tests:\n");
 
     suppress_output();
@@ -282,6 +306,12 @@ static void runTests() {
     RUN_SELF_TEST(test_vm_interpret_complex);
     RUN_SELF_TEST(test_vm_interpret_chunk_still_works);
     RUN_SELF_TEST(test_vm_error_on_bad_source);
+
+    fprintf(out, "\nString tests (Chapter 19):\n");
+    RUN_SELF_TEST(test_compile_string);
+    RUN_SELF_TEST(test_vm_string_literal);
+    RUN_SELF_TEST(test_vm_string_concatenation);
+    RUN_SELF_TEST(test_vm_string_type_error);
 
     restore_output();
 

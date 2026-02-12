@@ -1,8 +1,10 @@
 #include "vm.hpp"
 #include "chunk.hpp"
 #include "debug.hpp"
+#include "object.hpp"
 #include <cassert>
 #include <cstdio>
+#include <cstring>
 #include <string>
 
 // Simple test framework
@@ -321,8 +323,112 @@ TEST(test_vm_add_type_error) {
     assert(result == InterpretResult::INTERPRET_RUNTIME_ERROR);
 }
 
+// ---- Chapter 19: String tests (direct bytecode) ----
+
+// Helper: emit a string constant instruction
+static void emitStringConstant(Chunk& chunk, const char* str, int line) {
+    ObjString* objStr = copyString(str, static_cast<int>(strlen(str)));
+    int idx = chunk.addConstant(OBJ_VAL(reinterpret_cast<Obj*>(objStr)));
+    chunk.write(static_cast<uint8_t>(OpCode::OP_CONSTANT), line);
+    chunk.write(static_cast<uint8_t>(idx), line);
+}
+
+TEST(test_vm_string_constant) {
+    // Push a string constant and return it
+    // Build chunk with string constants, then let VM execute
+    Obj* objects = nullptr;
+    setObjectList(&objects);
+
+    Chunk chunk;
+    emitStringConstant(chunk, "hello", 1);
+    emitOp(chunk, OpCode::OP_RETURN, 1);
+
+    VM vm;
+    printf("\n");
+    InterpretResult result = vm.interpret(&chunk);
+    assert(result == InterpretResult::INTERPRET_OK);
+    freeObjects(objects);
+    setObjectList(nullptr);
+}
+
+TEST(test_vm_string_concat_bytecode) {
+    // Push two strings, add (concatenate), return
+    Obj* objects = nullptr;
+    setObjectList(&objects);
+
+    Chunk chunk;
+    emitStringConstant(chunk, "foo", 1);
+    emitStringConstant(chunk, "bar", 1);
+    emitOp(chunk, OpCode::OP_ADD, 1);
+    emitOp(chunk, OpCode::OP_RETURN, 1);
+
+    VM vm;
+    printf("\n");
+    InterpretResult result = vm.interpret(&chunk);
+    assert(result == InterpretResult::INTERPRET_OK);
+    freeObjects(objects);
+    setObjectList(nullptr);
+}
+
+TEST(test_vm_string_equal_bytecode) {
+    // Two identical strings should be equal
+    Obj* objects = nullptr;
+    setObjectList(&objects);
+
+    Chunk chunk;
+    emitStringConstant(chunk, "same", 1);
+    emitStringConstant(chunk, "same", 1);
+    emitOp(chunk, OpCode::OP_EQUAL, 1);
+    emitOp(chunk, OpCode::OP_RETURN, 1);
+
+    VM vm;
+    printf("\n");
+    InterpretResult result = vm.interpret(&chunk);
+    assert(result == InterpretResult::INTERPRET_OK);
+    freeObjects(objects);
+    setObjectList(nullptr);
+}
+
+TEST(test_vm_string_not_equal_bytecode) {
+    // Two different strings should not be equal
+    Obj* objects = nullptr;
+    setObjectList(&objects);
+
+    Chunk chunk;
+    emitStringConstant(chunk, "abc", 1);
+    emitStringConstant(chunk, "xyz", 1);
+    emitOp(chunk, OpCode::OP_EQUAL, 1);
+    emitOp(chunk, OpCode::OP_RETURN, 1);
+
+    VM vm;
+    printf("\n");
+    InterpretResult result = vm.interpret(&chunk);
+    assert(result == InterpretResult::INTERPRET_OK);
+    freeObjects(objects);
+    setObjectList(nullptr);
+}
+
+TEST(test_vm_string_number_add_error) {
+    // String + number should be a runtime error
+    Obj* objects = nullptr;
+    setObjectList(&objects);
+
+    Chunk chunk;
+    emitStringConstant(chunk, "hello", 1);
+    emitConstant(chunk, 42.0, 1);
+    emitOp(chunk, OpCode::OP_ADD, 1);
+    emitOp(chunk, OpCode::OP_RETURN, 1);
+
+    VM vm;
+    printf("\n");
+    InterpretResult result = vm.interpret(&chunk);
+    assert(result == InterpretResult::INTERPRET_RUNTIME_ERROR);
+    freeObjects(objects);
+    setObjectList(nullptr);
+}
+
 int main() {
-    printf("=== VM Unit Tests (Chapter 18 - Types of Values) ===\n\n");
+    printf("=== VM Unit Tests (Chapter 19 - Strings) ===\n\n");
 
     RUN_TEST(test_vm_push_pop);
     RUN_TEST(test_vm_constant_return);
@@ -346,6 +452,14 @@ int main() {
     RUN_TEST(test_vm_less);
     RUN_TEST(test_vm_negate_non_number_error);
     RUN_TEST(test_vm_add_type_error);
+
+    // Chapter 19 tests
+    printf("\n--- Chapter 19: Strings ---\n");
+    RUN_TEST(test_vm_string_constant);
+    RUN_TEST(test_vm_string_concat_bytecode);
+    RUN_TEST(test_vm_string_equal_bytecode);
+    RUN_TEST(test_vm_string_not_equal_bytecode);
+    RUN_TEST(test_vm_string_number_add_error);
 
     printf("\n=== Results: %d/%d tests passed ===\n", tests_passed, tests_run);
 

@@ -1,5 +1,6 @@
 #include "compiler.hpp"
 #include "scanner.hpp"
+#include "object.hpp"
 #include "debug.hpp"
 #include <cstdio>
 #include <cstdlib>
@@ -153,6 +154,13 @@ static void literal() {
     }
 }
 
+static void string() {
+    // Strip the leading and trailing quote characters.
+    emitConstant(OBJ_VAL(reinterpret_cast<Obj*>(
+        copyString(parser.previous.lexeme.data() + 1,
+                   static_cast<int>(parser.previous.lexeme.size()) - 2))));
+}
+
 static void grouping() {
     expression();
     consume(TokenType::RIGHT_PAREN, "Expect ')' after expression.");
@@ -232,7 +240,7 @@ static ParseRule rules[] = {
     /* LESS          */ {nullptr,  binary,  Precedence::PREC_COMPARISON},
     /* LESS_EQUAL    */ {nullptr,  binary,  Precedence::PREC_COMPARISON},
     /* IDENTIFIER    */ {nullptr,  nullptr, Precedence::PREC_NONE},
-    /* STRING        */ {nullptr,  nullptr, Precedence::PREC_NONE},
+    /* STRING        */ {string,   nullptr, Precedence::PREC_NONE},
     /* NUMBER        */ {number,   nullptr, Precedence::PREC_NONE},
     /* AND           */ {nullptr,  nullptr, Precedence::PREC_NONE},
     /* CLASS         */ {nullptr,  nullptr, Precedence::PREC_NONE},

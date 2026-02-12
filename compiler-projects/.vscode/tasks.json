@@ -19,7 +19,8 @@
                 "${workspaceFolder}/vm.cpp",
                 "${workspaceFolder}/chunk.cpp",
                 "${workspaceFolder}/value.cpp",
-                "${workspaceFolder}/debug.cpp"
+                "${workspaceFolder}/debug.cpp",
+                "${workspaceFolder}/object.cpp"
             ],
             "group": {
                 "kind": "build",
@@ -45,7 +46,8 @@
                 "${workspaceFolder}/vm.cpp",
                 "${workspaceFolder}/chunk.cpp",
                 "${workspaceFolder}/value.cpp",
-                "${workspaceFolder}/debug.cpp"
+                "${workspaceFolder}/debug.cpp",
+                "${workspaceFolder}/object.cpp"
             ],
             "group": "build",
             "problemMatcher": ["$gcc"]
@@ -67,7 +69,8 @@
                 "${workspaceFolder}/vm.cpp",
                 "${workspaceFolder}/chunk.cpp",
                 "${workspaceFolder}/value.cpp",
-                "${workspaceFolder}/debug.cpp"
+                "${workspaceFolder}/debug.cpp",
+                "${workspaceFolder}/object.cpp"
             ],
             "group": "build",
             "problemMatcher": ["$gcc"]
@@ -105,7 +108,8 @@
                 "${workspaceFolder}/chunk_test.cpp",
                 "${workspaceFolder}/chunk.cpp",
                 "${workspaceFolder}/value.cpp",
-                "${workspaceFolder}/debug.cpp"
+                "${workspaceFolder}/debug.cpp",
+                "${workspaceFolder}/object.cpp"
             ],
             "group": "build",
             "problemMatcher": ["$gcc"]
@@ -125,7 +129,8 @@
                 "${workspaceFolder}/chunk_demo.cpp",
                 "${workspaceFolder}/chunk.cpp",
                 "${workspaceFolder}/value.cpp",
-                "${workspaceFolder}/debug.cpp"
+                "${workspaceFolder}/debug.cpp",
+                "${workspaceFolder}/object.cpp"
             ],
             "group": "build",
             "problemMatcher": ["$gcc"]
@@ -148,7 +153,8 @@
                 "${workspaceFolder}/value.cpp",
                 "${workspaceFolder}/debug.cpp",
                 "${workspaceFolder}/compiler.cpp",
-                "${workspaceFolder}/scanner.cpp"
+                "${workspaceFolder}/scanner.cpp",
+                "${workspaceFolder}/object.cpp"
             ],
             "group": "build",
             "problemMatcher": ["$gcc"]
@@ -171,7 +177,8 @@
                 "${workspaceFolder}/value.cpp",
                 "${workspaceFolder}/debug.cpp",
                 "${workspaceFolder}/compiler.cpp",
-                "${workspaceFolder}/scanner.cpp"
+                "${workspaceFolder}/scanner.cpp",
+                "${workspaceFolder}/object.cpp"
             ],
             "group": "build",
             "problemMatcher": ["$gcc"]
